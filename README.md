@@ -2,15 +2,21 @@
 
 **An agentic battery lab that decides which cells deserve a full life test, after seeing only their first 50 cycles.**
 
-Four specialist agents, orchestrated by Omnigent, propose and run selection rules under a fixed budget of cells. A human approves every plan before any outcome is revealed. Built for Hack-Nation x Databricks, Challenge 03 "Agentic Scientific Discovery", on the Severson et al. 2019 battery dataset.
+Four specialist agents, orchestrated by Omnigent, propose and run selection rules under a fixed test budget. A human approves every plan before any outcome is revealed. Built for Hack-Nation x Databricks, Challenge 03 "Agentic Scientific Discovery", on the Severson et al. 2019 battery dataset.
+
+The project has two rounds, and the second exists because the first failed:
+- **v1** made one decision at cycle 50 and lost to the published ΔQ rule. That result is kept below unchanged.
+- **v2** changes the experiment design. It adopts ΔQ as the base signal and makes allocation decisions at checkpoints 50, 100 and 150 under a channel-cycle budget. It was pre-registered in git before its test batch (batch 3) was opened.
 
 ## Status at a glance
 
 | | |
 |---|---|
 | Pipeline (data → features → agents → evaluation) | ✅ Runs end to end from a clean state; reproducible run to run |
-| Tests | ✅ 54 passing (leakage, gates, LLM path, Omnigent bundle, concurrency) |
-| Measured result | ❌ CycleWise does **not** beat the ΔQ baseline (see below) |
+| Tests | ✅ 65 passing (leakage, gates, LLM path, Omnigent bundle, concurrency, v2 paid-data control) |
+| v1 result (one decision at cycle 50) | ❌ CycleWise does **not** beat the ΔQ baseline (see below) |
+| v2 pre-registration | ✅ Committed (`e5725a5`), hash-locked. ⏳ Not yet pushed to GitHub. |
+| v2 sequential loop | ✅ Runs end to end on b1/b2 (development only); ⏳ final test on b3 not run yet, b3 not downloaded |
 | Live Claude agents via Omnigent | ⚠️ Run as far as the human approval step; full live results not measured yet |
 | Databricks (Delta, Unity Catalog, dashboard) | ⚠️ Scripts written, untested (no workspace available) |
 
@@ -20,7 +26,7 @@ A battery lab can keep only some cells on test. If an agentic lab sees only the 
 
 **Bottleneck.** Cycling a cell to end of life takes hundreds to thousands of cycles, which means weeks of channel time per cell. Choosing which cells earn that time is a decision made with almost no data.
 
-## Result (measured, honest)
+## v1 result: one decision at cycle 50 (measured, honest)
 
 From run `final-check` (`reports/final-check.md`). Budget: 12 cells per batch. Metric: recall of long-lived cells, with 95% bootstrap CIs (2,000 resamples, fixed seed).
 
@@ -52,6 +58,34 @@ None reached approval:
 - **Later runs:** the one-shot `-p` CLI mode exited while sub-agents were still working. That is a limitation of the non-interactive harness used for testing, not of CycleWise.
 
 **So the live LLM results are not measured yet.** Finish them by running Omnigent interactively ([below](#live-loop-in-omnigent)) and approving each plan yourself.
+
+## v2: sequential checkpoints (pre-registered)
+
+**Why.** v1 asked the agents to out-predict ΔQ from one 50-cycle snapshot, with about 40 cells per batch. Tweaking the rule cannot fix that. v2 changes the experiment design instead:
+- ΔQ (Severson 2019, cited) is the base signal.
+- The lab's job is **allocation**: stop clear losers at cycle 50, spend extra cycles only where the decision is uncertain, and keep a fixed number of cells to end of life.
+
+**Design** (all fixed in [`config/prereg_v2.yaml`](config/prereg_v2.yaml)):
+- **Checkpoints at 50, 100 and 150.** Every cell is screened to 50. The Planner decides how many to continue to 100, then to 150. At 150, k_final = round(0.25·N) cells are kept to end of life.
+- **Budget:** extensions share 50·⌈0.75·N⌉ channel-cycles. Options are generated inside the budget, and at least two are offered at every checkpoint. A human approves every checkpoint.
+- **Agents see only paid-for data.** Each run has its own database holding cycles ≤ 50. Cycles up to 100 or 150 are copied in only for cells whose extension was approved and committed. Labels appear only for cells that died inside the paid window or were kept to end of life.
+- **Roles:** b1 train, b2 validation (the Critic may revise the 150-cycle rule after either, if the pre-registered trigger fires), b3 test (rule frozen; all headline claims).
+- **Label:** within-batch top quartile, because v1's absolute threshold broke on b2 (batch shift). v1's threshold is still reported as the secondary label.
+- **Comparators,** all with the same cost accounting: test everything to end of life; one-shot ΔQ at 50; one-shot ΔQ at 100 (Severson's stronger setting); early capacity.
+- **Claim rules** were fixed in advance: "better" only if the paired recall-difference CI is above 0; "non-inferior and cheaper" only if its lower bound is above −0.10 and it uses fewer channel-cycles.
+
+**Proof of order.** Commit `e5725a5` adds the pre-registration with its SHA-256 (`ac30f55b…`) before any batch-3 code or data. Every v2 run checks that the file is committed and unchanged, and records the commit hash. Batch 3 can only be loaded through that check.
+
+**Development results on b1/b2** (run `v2-dev-001`, `reports/v2_v2-dev-001.md`). **These are not headline results:** b1 and b2 labels were seen during v1. Deterministic agent policy, `DEMO_AUTO_APPROVE=true`. Primary label (within-batch Q75), recall at k_final with 95% CI, and total channel-cycles:
+
+| Batch | CycleWise v2 | One-shot ΔQ@50 | One-shot ΔQ@100 | Test all to EOL | Early capacity |
+|---|---|---|---|---|---|
+| b1 (k=12) | 0.75 [0.50, 1.00] · 18,338 | 0.75 · 17,755 | 0.75 · 19,488 | 1.00 · 42,245 | 0.17 · 11,461 |
+| b2 (k=11) | 0.33 [0.08, 0.62] · 7,783 | 0.42 · 7,143 | 0.42 · 8,928 | 1.00 · 20,348 | 0.42 · 7,017 |
+
+- **b1:** CycleWise matches the recall of both ΔQ rules. It uses 6% fewer channel-cycles than ΔQ@100 (pre-registered claim: *non-inferior and cheaper*) but 3% more than ΔQ@50, and 57% fewer than testing everything.
+- **b2:** CycleWise is worse than both ΔQ rules (−0.08 recall). The Critic's trigger just missed (Spearman 0.51 vs the 0.5 threshold), so no revision happened. Nothing was retuned in response.
+- **b3 (the real test):** not run yet. It needs the pre-registration pushed, then `python -m cyclewise.v2.data --with-b3`.
 
 ## How it works
 
@@ -108,10 +142,21 @@ uv venv --python 3.12 .venv && uv pip install --python .venv -e ".[dev]" omnigen
 .venv/bin/python -m cyclewise.data.download     # ~5 GB, resumable, size-checked
 .venv/bin/python -m cyclewise.data.load_raw     # load + clean + label (prints counts only)
 .venv/bin/python -m cyclewise.data.splits       # features, two-DB split, freeze threshold
-.venv/bin/python -m pytest                      # 54 tests
+.venv/bin/python -m cyclewise.v2.data          # v2 warehouse for b1/b2 (Qdlin at 100/150, labels hidden)
+.venv/bin/python -m pytest                      # 65 tests
 ```
 
-Without the data (e.g. a fresh clone), `pytest` gives 45 passed and 9 skipped. The 9 tests marked `requires_data` need the built warehouse, and their skip message lists the three data commands.
+Without the data (e.g. a fresh clone), `pytest` gives 53 passed and 12 skipped. The 12 tests marked `requires_data` need the built warehouses, and their skip message lists the data commands.
+
+**v2 loop:**
+
+```bash
+DEMO_AUTO_APPROVE=true CYCLEWISE_LLM=offline .venv/bin/python -m cyclewise.v2.loop   # b1, b2 (and b3 if built)
+.venv/bin/python -m cyclewise.v2.data --with-b3     # ONLY after the pre-registration is pushed: downloads + loads b3
+.venv/bin/python -m cyclewise.v2.loop               # full v2 run incl. the b3 test; approvals at every checkpoint
+```
+
+Reports are written to `reports/v2_<run_id>.md` and `.json`.
 
 Expected output of the data steps:
 
@@ -199,7 +244,8 @@ Set `MLFLOW_TRACKING_URI=databricks` to log runs to the workspace.
 ## Project layout
 
 ```
-config/            cyclewise.yaml (pre-registered settings), frozen.yaml (threshold, written once), exclusions.yaml
+config/            cyclewise.yaml (v1 pre-registered settings), frozen.yaml (v1 threshold, written once),
+                   prereg_v2.yaml + prereg_v2.lock (v2 pre-registration, hash-locked), exclusions.yaml
 cyclewise/
   data/            download, load_raw (HDF5 → tables), featurize (cycles ≤ 50), splits (two-DB split + freeze)
   tools/           cutoff_view (cycle ≤ 50 guard), train_eval (rules), reveal (gated), anomaly, budget,
@@ -210,13 +256,16 @@ cyclewise/
   eval/            metrics, bootstrap, report, tracking (MLflow)
   record/          research_log (append-only, hash-chained), dblock (cross-process lock)
   demo/            replay
-  run_loop.py      headless orchestrator
+  run_loop.py      v1 headless orchestrator
+  prereg.py        v2 pre-registration guard (committed + hash-locked, else refuse)
+  v2/              data (b1-b3, checkpoint curves), visible (paid-for data per run), features,
+                   allocation (budgets, options), agents, loop (checkpoints), scoring (comparators, claims)
 omnigent/
   cyclewise_lab/   supervisor + agents/{evidence,planner,runner,critic_safety}; tools/python/<tool>.py
   gen_tools.py     regenerates the Omnigent tool files
   server.yaml      registers the custom policies on a shared server
 databricks/        Unity Catalog SQL, Delta upload, dashboard queries (untested)
-tests/             54 tests
+tests/             65 tests
 reports/           generated results per run
 ```
 
@@ -224,6 +273,7 @@ reports/           generated results per run
 
 | Symptom | Cause / fix |
 |---|---|
+| `prereg_v2.yaml differs from its frozen hash` / `is not committed` | The v2 pre-registration was edited or never committed. Revert it; it must not change after commit. |
 | `raw data missing or incomplete` | Run `python -m cyclewise.data.download` (resumes partial files). |
 | `missing [...frozen.yaml, ...early.duckdb]` | Run `load_raw` then `splits` before `run_loop`. Nothing is logged until this passes. |
 | `pre-registered part of config ... changed after the threshold was frozen` | You edited `preregistered`, batch roles or continuations. Revert. Paths, URLs and timeouts can change freely. |
@@ -244,7 +294,7 @@ reports/           generated results per run
 - **Approval where the human is:** the approval ASK is raised by the supervisor, whose session the human watches, never inside a headless sub-agent.
 - **Concurrent access:** the research log is guarded by a cross-process file lock, because Omnigent runs tools in subprocesses and policies in the server. Four parallel writers × 40 rows give 160 rows with unique sequence numbers and an intact hash chain.
 - **LLM retries:** each retry reaches the model again (the attempt number is part of the cache key), so a repeated bad answer is not replayed from cache.
-- **Tests (54):** leakage through every path; approval and reveal gates; budget, schema and citation guards; the log tamper check; the LLM path with a scripted fake model, including a full two-batch loop that takes the revision branch; the Omnigent bundle against Omnigent's own loader and dispatch check; and the tool-boundary rules.
+- **Tests (65):** leakage through every path; approval and reveal gates; budget, schema and citation guards; the log tamper check; the LLM path with a scripted fake model, including a full two-batch loop that takes the revision branch; the Omnigent bundle against Omnigent's own loader and dispatch check; the tool-boundary rules; and v2's pre-registration guard, budgets, and paid-for-data leakage control.
 
 ## Reproducibility
 
@@ -257,7 +307,8 @@ reports/           generated results per run
 
 - Retrospective evaluation only. No physical test time was saved.
 - Small samples: 41 and 43 scored cells. CIs are wide, and most differences are not distinguishable from zero.
-- One chemistry (LFP/graphite), one temperature (30 °C), fast-charge protocols only. Batch 3 is unused.
+- One chemistry (LFP/graphite), one temperature (30 °C), fast-charge protocols only.
+- v2's design was written after seeing b1/b2 labels (stated in the pre-registration). Only b3 results are claims; b1/b2 v2 numbers are development results.
 - Batch 2 is shorter-lived than batch 1, so the pre-registered absolute threshold yields no positives there.
 - The revised-rule path (Critic re-fits on revealed cells) did not trigger in the measured run, so it is tested only by unit tests.
 - Censored cells contribute lower bounds when fitting revised rules.
@@ -266,9 +317,9 @@ reports/           generated results per run
 
 ## Next experiment
 
-1. Complete a live Omnigent run with human approvals on the same frozen setup, and report the same table.
-2. Run prospectively on new cells, with sequential stop/continue decisions at cycles 50, 100, and 150 under a total cycle budget. Later checkpoints are where Severson-type features gain most of their power.
-3. Repeat on a second chemistry.
+1. Push the v2 pre-registration, then run v2 on batch 3 (the untouched test set) and report the table above for b3.
+2. Complete a live Omnigent run with human approvals at each checkpoint, and record it.
+3. Run v2 prospectively on new cells, then on a second chemistry.
 
 ## Citations
 
