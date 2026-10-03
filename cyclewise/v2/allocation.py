@@ -29,57 +29,65 @@ class Budget:
 
 
 def options_at_50(b: Budget, n_alive: int, spent: int) -> list[dict]:
-    """How many cells to continue to 100. Reserve k_final extensions for 100->150."""
-    remaining = b.extension - spent
-    hi = min(n_alive, remaining // STEP - b.k_final)
-    if hi < b.k_final:
-        hi = min(n_alive, remaining // STEP)  # cannot reserve; continue what we can
-    cands = {
-        "A": ("narrow", min(hi, b.k_final + max(1, b.k_final // 2))),
-        "B": ("balanced", min(hi, 2 * b.k_final)),
-        "C": ("wide", hi),
-    }
-    return _dedupe(cands, "continue_to_100",
-                   "keep the top-m cells by score on test to cycle 100; stop the rest at 50")
+    """Split the extension budget between the two steps. Each option fixes how many cells
+    continue to 100 (m) and how many it plans to carry on to 150 (m150 >= k_final), so the
+    150 checkpoint has a real choice (m150 > k_final) unless the option says otherwise."""
+    slots = (b.extension - spent) // STEP
+    k = b.k_final
+    out = []
+    # Largest affordable carry to 150 while at least as many cells reach 100: slots // 2.
+    deep = max(k, min(n_alive, slots // 2))
+    splits = (("A", "wide_shallow", k), ("B", "balanced", k + max(1, (deep - k) // 2)), ("C", "narrow_deep", deep))
+    for oid, name, m150 in splits:
+        m100 = min(n_alive, slots - m150)
+        if m100 < m150 or m150 < k:
+            continue
+        out.append({"option_id": oid, "name": name, "action": "continue_to_100", "m": m100, "m150_planned": m150,
+                    "ranking": "rule", "cost": (m100 + m150) * STEP,
+                    "description": f"continue the top {m100} to 100, then plan to carry {m150} to 150 "
+                                   f"(margin {m150 - k} over the {k} kept); up to {(m100 + m150) * STEP} channel-cycles"})
+    if not out:  # budget cannot carry k_final through both steps: best effort, never over budget
+        half = max(0, min(n_alive, slots // 2))
+        out.append({"option_id": "A", "name": "best_effort", "action": "continue_to_100", "m": half,
+                    "m150_planned": half, "ranking": "rule", "cost": 2 * half * STEP,
+                    "description": f"budget too small to carry {k} to 150: continue the top {half} to 100 "
+                                   f"and carry them all to 150"})
+    return _at_least_two(out)
 
 
-def options_at_100(b: Budget, n_alive: int, spent: int) -> list[dict]:
-    remaining = b.extension - spent
-    hi = min(n_alive, remaining // STEP)
-    lo = min(hi, b.k_final)
-    cands = {
-        "A": ("exploit", lo),
-        "B": ("margin", min(hi, lo + max(1, b.k_final // 2))),
-        "C": ("max", hi),
-    }
-    return _dedupe(cands, "continue_to_150", "keep the top-m cells by score on test to cycle 150")
+def options_at_100(b: Budget, n_alive: int, spent: int, planned: int | None = None) -> list[dict]:
+    """How many to carry to 150. Never fewer than k_final (pre-registered)."""
+    hi = max(0, min(n_alive, (b.extension - spent) // STEP))
+    k = min(b.k_final, n_alive, hi)   # the budget is a hard cap; below k_final is a logged best effort
+    cands = []
+    for oid, name, m in (("A", "planned", planned if planned is not None else hi), ("B", "minimum", k), ("C", "max", hi)):
+        m = max(k, min(hi, m))
+        if m not in [c["m"] for c in cands]:
+            cands.append({"option_id": oid, "name": name, "action": "continue_to_150", "m": m, "ranking": "rule",
+                          "cost": m * STEP, "description": f"continue the top {m} to 150 (margin {m - b.k_final}); "
+                                                           f"up to {m * STEP} channel-cycles"})
+    return _at_least_two(cands)
 
 
 def options_at_150(b: Budget, n_alive: int) -> list[dict]:
     k = min(b.k_final, n_alive)
     return [
         {"option_id": "A", "name": "rule", "action": "keep_to_eol", "m": k, "ranking": "rule",
-         "description": f"keep the top {k} by the rule in force to end of life"},
+         "description": f"keep the top {k} of {n_alive} by the rule in force to end of life"},
         {"option_id": "B", "name": "dq_only", "action": "keep_to_eol", "m": k, "ranking": "dq_only",
-         "description": f"keep the top {k} by ΔQ variance alone (Severson base signal) to end of life"},
+         "description": f"keep the top {k} of {n_alive} by ΔQ variance alone (Severson base signal) to end of life"},
     ]
 
 
-def _dedupe(cands: dict, action: str, desc: str) -> list[dict]:
-    out, seen = [], set()
-    for oid, (name, m) in cands.items():
-        m = max(0, int(m))
-        if m in seen:
-            continue
-        seen.add(m)
-        out.append({"option_id": oid, "name": name, "action": action, "m": m, "ranking": "rule",
-                    "cost": m * STEP, "description": f"{desc} (m={m}, up to {m * STEP} channel-cycles)"})
-    if len(out) < 2:  # always offer at least two distinct options
-        m = out[0]["m"]
-        alt = max(0, m - 1)
-        out.append({"option_id": "Z", "name": "one_fewer", "action": action, "m": alt, "ranking": "rule",
-                    "cost": alt * STEP, "description": f"{desc} (m={alt})"})
-    return out
+def _at_least_two(opts: list[dict]) -> list[dict]:
+    """The brief requires >= 2 options. If sizes collapse, offer the same size ranked by ΔQ alone
+    (never a size that breaks the pre-registered k_final rule)."""
+    if len(opts) >= 2:
+        return opts
+    o = dict(opts[0])
+    o.update(option_id="D", name=o["name"] + "_dq_only", ranking="dq_only",
+             description=o["description"] + "; ranked by ΔQ variance alone")
+    return [opts[0], o]
 
 
 def cut_to_budget(ranked: list[str], m: int, remaining: int) -> tuple[list[str], bool]:

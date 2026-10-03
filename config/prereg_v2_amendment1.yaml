@@ -1,0 +1,42 @@
+# CycleWise v2 — PRE-REGISTRATION AMENDMENT 1
+#
+# Written 2026-10-03 after a development run on b1/b2 and BEFORE batch 3 was
+# downloaded or opened (batch 3 still absent from disk at the time of commit).
+# config/prereg_v2.yaml is unchanged; this file only adds what is below.
+# Hash-locked in config/prereg_v2_amendment1.lock; v2 runs verify both.
+
+reason: >
+  The first v2 development run (b1/b2) exposed an implementation bug in the
+  checkpoint option generator: every option at cycle 50 reserved exactly
+  k_final extensions for 100->150, so the cycle-150 decision kept every cell
+  that reached it (no margin) and the "spend cycles near the boundary" design
+  of the pre-registration never ran. A padding option also offered fewer than
+  k_final cells at 100, which the pre-registration forbids.
+
+fixes:
+  - "checkpoint 50 options are budget SPLITS between the two extension steps:
+     A wide_shallow (carry k_final to 150), B balanced (about half the affordable
+     margin), C narrow_deep (largest carry to 150 with at least as many cells at 100:
+     floor(slots/2)). slots = remaining extension budget / 50."
+  - "checkpoint 100 options never go below k_final; the planned carry from 50 is option A"
+  - "if sizes collapse, the second option is the same size ranked by ΔQ alone (never an
+     option that breaks the k_final rule)"
+
+default_split_selection:
+  procedure: >
+    Run the deterministic policy once per split (A, B, C) on b1 (train) and b2
+    (validation) only. Choose the split with the highest mean primary recall
+    (within-batch Q75) over b1 and b2; ties broken by lower total channel-cycles.
+    Because b2 was used for this choice, b2 is no longer an unbiased validation;
+    only b3 results are claims.
+  results:   # run ids v2-sweep2-A/B/C, reports/v2_v2-sweep2-*.json
+    A: {b1_recall: 0.75, b2_recall: 0.33, mean: 0.542, b1_cycles: 18338, b2_cycles: 7783}
+    B: {b1_recall: 0.75, b2_recall: 0.42, mean: 0.583, b1_cycles: 18277, b2_cycles: 7825}
+    C: {b1_recall: 0.75, b2_recall: 0.58, mean: 0.667, b1_cycles: 18277, b2_cycles: 7905}
+  chosen: C
+
+default_split_at_50: C
+
+unchanged:
+  - "everything in config/prereg_v2.yaml: checkpoints, budgets, labels, comparators,
+     revision trigger, claim rules, b3 as the frozen test batch"

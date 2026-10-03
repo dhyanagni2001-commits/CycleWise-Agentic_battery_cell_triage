@@ -98,6 +98,7 @@ def checkpoint(run_id: str, batch: str, ckpt: int, options: list[dict], rankings
         stopped = [c for c in ranked if c not in selected]
         plan_id = f"{batch}-c{ckpt}-{uuid.uuid4().hex[:6]}"
         plan = {"plan_id": plan_id, "batch": batch, "checkpoint": ckpt, "options": options,
+                "planned_m150": chosen.get("m150_planned"),
                 "chosen": chosen["option_id"], "reason": reason, "selected": selected, "stopped": stopped,
                 "cut_at_budget": was_cut, "remaining_budget": remaining, "flags": flags}
         research_log.append(run_id, "planner", "checkpoint_plan", plan, batch=batch, inputs=context,
@@ -163,8 +164,11 @@ def run_batch(run_id: str, batch: str, role: str, state: dict) -> None:
     f50 = features.at_checkpoint(run_id, batch, 50)
     r50 = features.rank(features.score(rule, f50))
     opts = options_at_50(budget, len(r50), spent)
-    ext, pid = checkpoint(run_id, batch, 50, opts, {"rule": r50}, flags, budget.extension - spent,
+    r50_dq = features.rank(features.score(DQ_ONLY, f50))
+    ext, pid = checkpoint(run_id, batch, 50, opts, {"rule": r50, "dq_only": r50_dq}, flags, budget.extension - spent,
                           {"n_alive": len(r50), "k_final": budget.k_final, "budget": budget.extension, "spent": spent})
+    state["m150_planned"] = next((r["output"] for r in research_log.rows(run_id=run_id, event="checkpoint_plan")
+                                  if r["output"]["plan_id"] == pid), {}).get("planned_m150")
     got = visible.materialize(run_id, batch, ext, 50, 100, pid)
     cost = int((got["paid_to"] - 50).sum()) if len(got) else 0
     spent += cost
@@ -175,8 +179,10 @@ def run_batch(run_id: str, batch: str, role: str, state: dict) -> None:
     # ---- checkpoint 100 -> 150
     f100 = features.at_checkpoint(run_id, batch, 100)
     r100 = features.rank(features.score(rule, f100))
-    opts = options_at_100(budget, len(r100), spent)
-    ext, pid = checkpoint(run_id, batch, 100, opts, {"rule": r100}, flags, budget.extension - spent,
+    planned = state.get("m150_planned")
+    opts = options_at_100(budget, len(r100), spent, planned)
+    r100_dq = features.rank(features.score(DQ_ONLY, f100))
+    ext, pid = checkpoint(run_id, batch, 100, opts, {"rule": r100, "dq_only": r100_dq}, flags, budget.extension - spent,
                           {"n_alive": len(r100), "k_final": budget.k_final, "budget": budget.extension, "spent": spent})
     got = visible.materialize(run_id, batch, ext, 100, 150, pid)
     cost = int((got["paid_to"] - 100).sum()) if len(got) else 0

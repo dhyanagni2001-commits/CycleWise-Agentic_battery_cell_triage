@@ -1,0 +1,553 @@
+{
+  "run_id": "v2-sweep2-A",
+  "version": 2,
+  "prereg_commit": "e5725a5e7fdc81ec2c7057bb71a081f9c2dd8f1e",
+  "prereg_sha256": "ac30f55bb9955dde15d08fa63c0858b30dd0cb8027edf802d3a7729ac3fad676",
+  "llm_backend": "offline",
+  "demo_auto_approve": true,
+  "fallback_steps": 8,
+  "revisions": [],
+  "batches": {
+    "b1": {
+      "role": "train",
+      "n": 46,
+      "k_final": 12,
+      "extension_budget": 1750,
+      "extension_spent": 1750,
+      "continued_to_100": 23,
+      "continued_to_150": 12,
+      "n_censored": 5,
+      "costs": {
+        "cyclewise": 18338,
+        "test_all_to_eol": 42245,
+        "one_shot_dq50": 17755,
+        "one_shot_dq100": 19488,
+        "early_capacity50": 11461
+      },
+      "label_rules": {
+        "primary_within_batch_q75": {
+          "n_scored": 41,
+          "n_long_lived": 12,
+          "n_unknown": 5,
+          "random_expected": 0.2926829268292683,
+          "oracle": 1.0,
+          "methods": {
+            "cyclewise": {
+              "recall": 0.75,
+              "ci_low": 0.5,
+              "ci_high": 1.0,
+              "cost": 18338,
+              "selected": [
+                "b1c0",
+                "b1c1",
+                "b1c11",
+                "b1c12",
+                "b1c16",
+                "b1c2",
+                "b1c3",
+                "b1c4",
+                "b1c40",
+                "b1c41",
+                "b1c5",
+                "b1c9"
+              ]
+            },
+            "test_all_to_eol": {
+              "recall": 1.0,
+              "ci_low": 1.0,
+              "ci_high": 1.0,
+              "cost": 42245,
+              "selected": [
+                "b1c0",
+                "b1c1",
+                "b1c10",
+                "b1c11",
+                "b1c12",
+                "b1c13",
+                "b1c14",
+                "b1c15",
+                "b1c16",
+                "b1c17",
+                "b1c18",
+                "b1c19",
+                "b1c2",
+                "b1c20",
+                "b1c21",
+                "b1c22",
+                "b1c23",
+                "b1c24",
+                "b1c25",
+                "b1c26",
+                "b1c27",
+                "b1c28",
+                "b1c29",
+                "b1c3",
+                "b1c30",
+                "b1c31",
+                "b1c32",
+                "b1c33",
+                "b1c34",
+                "b1c35",
+                "b1c36",
+                "b1c37",
+                "b1c38",
+                "b1c39",
+                "b1c4",
+                "b1c40",
+                "b1c41",
+                "b1c42",
+                "b1c43",
+                "b1c44",
+                "b1c45",
+                "b1c5",
+                "b1c6",
+                "b1c7",
+                "b1c8",
+                "b1c9"
+              ],
+              "cyclewise_minus_this": {
+                "mean": -0.24743501568950488,
+                "ci_low": -0.5,
+                "ci_high": -0.0
+              },
+              "claim": "not_better"
+            },
+            "one_shot_dq50": {
+              "recall": 0.75,
+              "ci_low": 0.5,
+              "ci_high": 1.0,
+              "cost": 17755,
+              "selected": [
+                "b1c0",
+                "b1c1",
+                "b1c11",
+                "b1c14",
+                "b1c2",
+                "b1c22",
+                "b1c23",
+                "b1c3",
+                "b1c4",
+                "b1c40",
+                "b1c41",
+                "b1c5"
+              ],
+              "cyclewise_minus_this": {
+                "mean": -0.0016010406088579454,
+                "ci_low": -0.23124999999999743,
+                "ci_high": 0.23529411764705876
+              },
+              "claim": "not_better"
+            },
+            "one_shot_dq100": {
+              "recall": 0.75,
+              "ci_low": 0.5,
+              "ci_high": 1.0,
+              "cost": 19488,
+              "selected": [
+                "b1c0",
+                "b1c1",
+                "b1c11",
+                "b1c12",
+                "b1c16",
+                "b1c2",
+                "b1c3",
+                "b1c4",
+                "b1c40",
+                "b1c41",
+                "b1c5",
+                "b1c9"
+              ],
+              "cyclewise_minus_this": {
+                "mean": -0.0,
+                "ci_low": -0.0,
+                "ci_high": -0.0
+              },
+              "claim": "non_inferior_and_cheaper"
+            },
+            "early_capacity50": {
+              "recall": 0.16666666666666666,
+              "ci_low": 0.0,
+              "ci_high": 0.4166666666666667,
+              "cost": 11461,
+              "selected": [
+                "b1c16",
+                "b1c19",
+                "b1c26",
+                "b1c31",
+                "b1c33",
+                "b1c39",
+                "b1c40",
+                "b1c44",
+                "b1c45",
+                "b1c7",
+                "b1c8",
+                "b1c9"
+              ],
+              "cyclewise_minus_this": {
+                "mean": 0.5852446815654245,
+                "ci_low": 0.2857142857142857,
+                "ci_high": 0.8888888888888888
+              },
+              "claim": "better"
+            }
+          }
+        },
+        "secondary_absolute_v1": {
+          "n_scored": 41,
+          "n_long_lived": 12,
+          "n_unknown": 5,
+          "random_expected": 0.2926829268292683,
+          "oracle": 1.0,
+          "methods": {
+            "cyclewise": {
+              "recall": 0.75,
+              "ci_low": 0.5,
+              "ci_high": 1.0,
+              "cost": 18338,
+              "selected": [
+                "b1c0",
+                "b1c1",
+                "b1c11",
+                "b1c12",
+                "b1c16",
+                "b1c2",
+                "b1c3",
+                "b1c4",
+                "b1c40",
+                "b1c41",
+                "b1c5",
+                "b1c9"
+              ]
+            },
+            "test_all_to_eol": {
+              "recall": 1.0,
+              "ci_low": 1.0,
+              "ci_high": 1.0,
+              "cost": 42245,
+              "selected": [
+                "b1c0",
+                "b1c1",
+                "b1c10",
+                "b1c11",
+                "b1c12",
+                "b1c13",
+                "b1c14",
+                "b1c15",
+                "b1c16",
+                "b1c17",
+                "b1c18",
+                "b1c19",
+                "b1c2",
+                "b1c20",
+                "b1c21",
+                "b1c22",
+                "b1c23",
+                "b1c24",
+                "b1c25",
+                "b1c26",
+                "b1c27",
+                "b1c28",
+                "b1c29",
+                "b1c3",
+                "b1c30",
+                "b1c31",
+                "b1c32",
+                "b1c33",
+                "b1c34",
+                "b1c35",
+                "b1c36",
+                "b1c37",
+                "b1c38",
+                "b1c39",
+                "b1c4",
+                "b1c40",
+                "b1c41",
+                "b1c42",
+                "b1c43",
+                "b1c44",
+                "b1c45",
+                "b1c5",
+                "b1c6",
+                "b1c7",
+                "b1c8",
+                "b1c9"
+              ],
+              "cyclewise_minus_this": {
+                "mean": -0.24743501568950488,
+                "ci_low": -0.5,
+                "ci_high": -0.0
+              },
+              "claim": "not_better"
+            },
+            "one_shot_dq50": {
+              "recall": 0.75,
+              "ci_low": 0.5,
+              "ci_high": 1.0,
+              "cost": 17755,
+              "selected": [
+                "b1c0",
+                "b1c1",
+                "b1c11",
+                "b1c14",
+                "b1c2",
+                "b1c22",
+                "b1c23",
+                "b1c3",
+                "b1c4",
+                "b1c40",
+                "b1c41",
+                "b1c5"
+              ],
+              "cyclewise_minus_this": {
+                "mean": -0.0016010406088579454,
+                "ci_low": -0.23124999999999743,
+                "ci_high": 0.23529411764705876
+              },
+              "claim": "not_better"
+            },
+            "one_shot_dq100": {
+              "recall": 0.75,
+              "ci_low": 0.5,
+              "ci_high": 1.0,
+              "cost": 19488,
+              "selected": [
+                "b1c0",
+                "b1c1",
+                "b1c11",
+                "b1c12",
+                "b1c16",
+                "b1c2",
+                "b1c3",
+                "b1c4",
+                "b1c40",
+                "b1c41",
+                "b1c5",
+                "b1c9"
+              ],
+              "cyclewise_minus_this": {
+                "mean": -0.0,
+                "ci_low": -0.0,
+                "ci_high": -0.0
+              },
+              "claim": "non_inferior_and_cheaper"
+            },
+            "early_capacity50": {
+              "recall": 0.16666666666666666,
+              "ci_low": 0.0,
+              "ci_high": 0.4166666666666667,
+              "cost": 11461,
+              "selected": [
+                "b1c16",
+                "b1c19",
+                "b1c26",
+                "b1c31",
+                "b1c33",
+                "b1c39",
+                "b1c40",
+                "b1c44",
+                "b1c45",
+                "b1c7",
+                "b1c8",
+                "b1c9"
+              ],
+              "cyclewise_minus_this": {
+                "mean": 0.5852446815654245,
+                "ci_low": 0.2857142857142857,
+                "ci_high": 0.8888888888888888
+              },
+              "claim": "better"
+            }
+          }
+        }
+      }
+    },
+    "b2": {
+      "role": "validation",
+      "n": 43,
+      "k_final": 11,
+      "extension_budget": 1650,
+      "extension_spent": 1650,
+      "continued_to_100": 22,
+      "continued_to_150": 11,
+      "n_censored": 0,
+      "costs": {
+        "cyclewise": 7783,
+        "test_all_to_eol": 20348,
+        "one_shot_dq50": 7143,
+        "one_shot_dq100": 8928,
+        "early_capacity50": 7017
+      },
+      "label_rules": {
+        "primary_within_batch_q75": {
+          "n_scored": 43,
+          "n_long_lived": 12,
+          "n_unknown": 0,
+          "random_expected": 0.2558139534883721,
+          "oracle": 0.9166666666666666,
+          "methods": {
+            "cyclewise": {
+              "recall": 0.3333333333333333,
+              "ci_low": 0.08333333333333333,
+              "ci_high": 0.6156249999999988,
+              "cost": 7783,
+              "selected": [
+                "b2c20",
+                "b2c24",
+                "b2c29",
+                "b2c30",
+                "b2c31",
+                "b2c33",
+                "b2c34",
+                "b2c42",
+                "b2c45",
+                "b2c47",
+                "b2c5"
+              ]
+            },
+            "test_all_to_eol": {
+              "recall": 1.0,
+              "ci_low": 1.0,
+              "ci_high": 1.0,
+              "cost": 20348,
+              "selected": [
+                "b2c0",
+                "b2c1",
+                "b2c10",
+                "b2c11",
+                "b2c12",
+                "b2c13",
+                "b2c14",
+                "b2c17",
+                "b2c18",
+                "b2c19",
+                "b2c2",
+                "b2c20",
+                "b2c21",
+                "b2c22",
+                "b2c23",
+                "b2c24",
+                "b2c25",
+                "b2c26",
+                "b2c27",
+                "b2c28",
+                "b2c29",
+                "b2c3",
+                "b2c30",
+                "b2c31",
+                "b2c32",
+                "b2c33",
+                "b2c34",
+                "b2c35",
+                "b2c36",
+                "b2c37",
+                "b2c38",
+                "b2c39",
+                "b2c4",
+                "b2c40",
+                "b2c41",
+                "b2c42",
+                "b2c43",
+                "b2c44",
+                "b2c45",
+                "b2c46",
+                "b2c47",
+                "b2c5",
+                "b2c6"
+              ],
+              "cyclewise_minus_this": {
+                "mean": -0.6668001889089955,
+                "ci_low": -0.9166666666666666,
+                "ci_high": -0.3843750000000004
+              },
+              "claim": "not_better"
+            },
+            "one_shot_dq50": {
+              "recall": 0.4166666666666667,
+              "ci_low": 0.125,
+              "ci_high": 0.7142857142857143,
+              "cost": 7143,
+              "selected": [
+                "b2c18",
+                "b2c2",
+                "b2c20",
+                "b2c27",
+                "b2c28",
+                "b2c29",
+                "b2c30",
+                "b2c32",
+                "b2c34",
+                "b2c41",
+                "b2c47"
+              ],
+              "cyclewise_minus_this": {
+                "mean": -0.08376260685824473,
+                "ci_low": -0.375,
+                "ci_high": 0.2
+              },
+              "claim": "not_better"
+            },
+            "one_shot_dq100": {
+              "recall": 0.4166666666666667,
+              "ci_low": 0.12481617647058856,
+              "ci_high": 0.7,
+              "cost": 8928,
+              "selected": [
+                "b2c10",
+                "b2c20",
+                "b2c24",
+                "b2c29",
+                "b2c30",
+                "b2c31",
+                "b2c33",
+                "b2c34",
+                "b2c45",
+                "b2c47",
+                "b2c5"
+              ],
+              "cyclewise_minus_this": {
+                "mean": -0.0817492025367059,
+                "ci_low": -0.2727272727272727,
+                "ci_high": -0.0
+              },
+              "claim": "not_better"
+            },
+            "early_capacity50": {
+              "recall": 0.4166666666666667,
+              "ci_low": 0.125,
+              "ci_high": 0.7,
+              "cost": 7017,
+              "selected": [
+                "b2c14",
+                "b2c20",
+                "b2c21",
+                "b2c22",
+                "b2c26",
+                "b2c33",
+                "b2c36",
+                "b2c37",
+                "b2c39",
+                "b2c40",
+                "b2c42"
+              ],
+              "cyclewise_minus_this": {
+                "mean": -0.07936060763833092,
+                "ci_low": -0.4545454545454545,
+                "ci_high": 0.2857142857142857
+              },
+              "claim": "not_better"
+            }
+          }
+        },
+        "secondary_absolute_v1": {
+          "n_scored": 43,
+          "n_long_lived": 0,
+          "n_unknown": 0,
+          "random_expected": 0.2558139534883721,
+          "oracle": null,
+          "methods": {},
+          "undefined": "no long-lived cells under this rule"
+        }
+      }
+    }
+  }
+}

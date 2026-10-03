@@ -31,12 +31,17 @@ def test_budget_formulas(n, k, ext):
 
 def test_options_are_affordable_and_at_least_two():
     b = Budget.for_batch(46)
-    for spent in (0, 600, 1500):
-        for opts in (options_at_50(b, 46, spent), options_at_100(b, 23, spent)):
+    for spent in (0, 600, 1150, 1500, 1750):
+        o50, o100 = options_at_50(b, 46, spent), options_at_100(b, 23, spent)
+        for opts in (o50, o100):
             assert len(opts) >= 2 and len({o["option_id"] for o in opts}) == len(opts)
-            assert all(o["m"] * 50 <= b.extension - spent for o in opts)
-    o50 = options_at_50(b, 46, 0)
-    assert all(o["m"] * 50 + b.k_final * 50 <= b.extension for o in o50)  # reserves the 100->150 step
+        # full planned cost (both steps) never exceeds what is left
+        assert all((o["m"] + o["m150_planned"]) * 50 <= b.extension - spent for o in o50)
+        assert all(o["m"] * 50 <= b.extension - spent for o in o100)
+        assert all(o["m"] >= o["m150_planned"] for o in o50)
+    # with the full budget there is a real margin option at 150 (amendment 1)
+    assert max(o["m150_planned"] for o in options_at_50(b, 46, 0)) > b.k_final
+    assert all(o["m"] >= b.k_final for o in options_at_100(b, 23, 0))
     assert len(options_at_150(b, 20)) >= 2
 
 

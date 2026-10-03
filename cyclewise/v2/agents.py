@@ -121,10 +121,13 @@ def planner(run_id: str, batch: str, checkpoint: int, options: list[dict], conte
             raise ValueError(f"chosen {c.chosen!r} is not one of {ids}")
 
     def fb() -> CheckpointChoice:
-        # Deterministic policy: balanced at 50, margin at 100, the rule at 150.
-        pref = {50: "B", 100: "B", 150: "A"}[checkpoint]
+        # Deterministic policy. At 50 the budget split comes from the pre-registration
+        # amendment (chosen on b1/b2 only); CYCLEWISE_V2_SPLIT overrides it for the dev sweep.
+        # At 100: carry the planned number; at 150: the rule in force.
+        pref = {50: default_split(), 100: "A", 150: "A"}[checkpoint]
         return CheckpointChoice(chosen=pref if pref in ids else ids[0],
-                                reason="deterministic policy: middle option, spend extra cycles near the boundary")
+                                reason=f"deterministic policy: split {default_split()} at 50, planned carry at 100, "
+                                       "rule at 150")
 
     prompt = f"Checkpoint {checkpoint}, batch {batch}.\nContext: {json.dumps(context)}\nOptions:\n" + \
              "\n".join(json.dumps(o) for o in options)
@@ -163,6 +166,17 @@ def critic(run_id: str, batch: str, permitted: bool, trigger: dict, revealed: li
               f"Revealed cells (kept to EOL or died in the paid window): {json.dumps(revealed, default=str)}\n")
     out = llm.complete(CritiqueV2, CRITIC_SYSTEM, prompt, fallback=fb, check=check)
     return out.value
+
+
+def default_split() -> str:
+    """Budget split at checkpoint 50: env override (dev sweep) > pre-registration amendment > 'B'."""
+    import os
+    from cyclewise import prereg
+    env = os.environ.get("CYCLEWISE_V2_SPLIT")
+    if env:
+        return env
+    amend = prereg.amendment()
+    return (amend or {}).get("default_split_at_50", "B")
 
 
 def prompt_version() -> str:
