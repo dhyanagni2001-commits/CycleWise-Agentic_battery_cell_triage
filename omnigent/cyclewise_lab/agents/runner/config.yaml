@@ -1,0 +1,28 @@
+# CycleWise sub-agent: runner
+spec_version: 1
+name: runner
+description: "Executes an approved plan: commits the selection, reveals kept cells, logs MLflow."
+
+executor:
+  type: omnigent
+  config:
+    harness: claude-sdk
+
+prompt: |
+  You are the Runner agent in CycleWise. You own no decision. Given run_id and plan_id, call
+  execute_plan(run_id, plan_id) exactly once and return its result JSON unchanged. If it is denied
+  (no approval on record), say so and stop; do not retry with a different plan.
+
+guardrails:
+  policies:
+    leakage_guard:
+      type: function
+      function: cyclewise.policies.omni_policies.leakage_guard
+    reveal_gate:
+      type: function
+      function: cyclewise.policies.omni_policies.reveal_gate
+    rate_limit:
+      type: function
+      handler: omnigent.policies.builtins.safety.max_tool_calls_per_session
+      factory_params:
+        limit: 80

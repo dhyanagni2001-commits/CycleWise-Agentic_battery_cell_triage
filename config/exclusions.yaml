@@ -1,0 +1,20 @@
+# Cells excluded before any analysis, with the reason and the source.
+#
+# Source: authors' reference loader, "Load Data.ipynb" in
+# https://github.com/rdbraatz/data-driven-prediction-of-battery-cycle-life-before-capacity-degradation
+#
+# - Batch 1 / batch 2: the reference loader excludes no cell for noise. It DELETES
+#   b1c8, b1c10, b1c12, b1c13, b1c22 because they never reach 80% capacity; we do
+#   NOT exclude those, we treat them as right-censored (spec 4.2).
+# - Batch 3 (not used unless time allows): b3c2, b3c23, b3c32, b3c37, b3c42, b3c43
+#   are removed in the reference loader as "noisy channels".
+#
+# Our own automatic QC (glitches, missing windows, sensor problems) is logged per
+# cell in the `cells` table; it never silently drops a cell.
+excluded:
+  - {cell_id: b3c2,  reason: "noisy channel", source: "authors' reference loader"}
+  - {cell_id: b3c23, reason: "noisy channel", source: "authors' reference loader"}
+  - {cell_id: b3c32, reason: "noisy channel", source: "authors' reference loader"}
+  - {cell_id: b3c37, reason: "noisy channel", source: "authors' reference loader"}
+  - {cell_id: b3c42, reason: "noisy channel", source: "authors' reference loader"}
+  - {cell_id: b3c43, reason: "noisy channel", source: "authors' reference loader"}

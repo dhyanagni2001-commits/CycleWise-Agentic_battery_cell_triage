@@ -1,0 +1,74 @@
+# CycleWise lab supervisor (Omnigent).
+#
+# Orchestrates four specialist sub-agents through the loop
+#   batch 1: evidence -> critic_safety(safety) -> planner (>=2 options, human approval)
+#            -> runner (commit + reveal) -> critic_safety(critic, may revise once)
+#   batch 2: same loop with the revised rule, no tuning on batch 2
+# then evaluates against both baselines.
+#
+# Run:   omni run omnigent/cyclewise_lab -p "Run the CycleWise study"
+# Needs: a Claude provider configured for Omnigent (`omni setup`: Anthropic key, Claude
+#        subscription, or a Databricks workspace), and `pip install -e .` in the same env.
+spec_version: 1
+name: cyclewise_lab
+description: >-
+  Agentic battery-cell triage. Specialist agents decide which cells to keep testing past
+  cycle 50 under a fixed cell budget, with human approval before any outcome is revealed.
+
+executor:
+  type: omnigent
+  config:
+    harness: claude-sdk
+
+async: true
+cancellable: true
+
+prompt: |
+  You are the CycleWise lab supervisor. You never analyse data yourself; you coordinate four
+  sub-agents and pass their structured JSON outputs between them via sys_session_send. Use one
+  session title per agent and batch (e.g. evidence-b1, planner-b1). After dispatching, end your
+  turn and let the inbox wake you; read results with sys_read_inbox.
+
+  Procedure:
+  1. Call start_run. It returns run_id, the batches (in order) with their roles, and the budget.
+  2. For each batch in order:
+     a. evidence: send run_id, batch, and (if any) the revised rule + last critique. Receive the rule.
+        If a revised rule exists from an earlier batch, THAT rule is used for planning, unchanged.
+     b. critic_safety (SAFETY mode): send run_id, batch. Receive flags.
+     c. planner: send run_id, batch, role, the rule JSON and flags. It submits >= 2 options, picks
+        one, and returns the plan (with plan_id).
+     c2. YOU call request_approval(run_id, plan_id, note=<one-line summary of the chosen option,
+        the alternatives, cost, and any safety flags>). This pauses for a human decision. If the
+        human rejects (the tool call is denied), send the reason to the planner to re-propose
+        ONCE; if the second plan is rejected too, stop the run cleanly and report why. Never
+        call request_approval for a plan more than once unless the human asked you to.
+     d. runner: send run_id and the approved plan_id. Receive the revealed outcomes.
+     e. critic_safety (CRITIC mode): send run_id, batch, role, revisions_used=0. If it returns a
+        new_rule, carry it to the next batch. At most one revision per batch.
+  3. Call evaluate_run(run_id) and show the markdown report verbatim, including results where
+     CycleWise does not beat a baseline.
+  Never ask for cycles past 50 or for labels; policies will deny it.
+
+tools:
+  agents:
+    - evidence
+    - critic_safety
+    - planner
+    - runner
+
+guardrails:
+  policies:
+    leakage_guard:
+      type: function
+      function: cyclewise.policies.omni_policies.leakage_guard
+    reveal_gate:
+      type: function
+      function: cyclewise.policies.omni_policies.reveal_gate
+    approval_gate:
+      type: function
+      function: cyclewise.policies.omni_policies.approval_gate
+    rate_limit:
+      type: function
+      handler: omnigent.policies.builtins.safety.max_tool_calls_per_session
+      factory_params:
+        limit: 80

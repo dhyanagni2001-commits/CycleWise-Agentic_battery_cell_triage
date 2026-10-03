@@ -1,0 +1,8 @@
+# Written once by cyclewise.data.splits before any agent run. Do not edit.
+long_lived_threshold_cycles: 914.0
+rule: train_batch_quantile
+quantile: 0.75
+computed_on:
+- b1
+config_hash: 0b20c1f4d0f4b5ed
+frozen_at: '2026-10-03T18:33:30.643795+00:00'

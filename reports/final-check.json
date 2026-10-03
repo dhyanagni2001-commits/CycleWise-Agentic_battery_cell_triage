@@ -1,0 +1,451 @@
+{
+  "run_id": "final-check",
+  "budget_cells": 12,
+  "llm_backend": "offline",
+  "model": "claude-opus-5",
+  "demo_auto_approve": true,
+  "fallback_steps": 6,
+  "agent_steps": 6,
+  "revised": false,
+  "batches": {
+    "b1": {
+      "n_cells": 46,
+      "n_censored": 5,
+      "n_label_unknown_primary": 5,
+      "n_flagged": 0,
+      "strategy": "B",
+      "rule": {
+        "fit_on": "none",
+        "kind": "zscore_sum",
+        "weights": {
+          "dq_logmin": -0.5,
+          "dq_logvar": -1.0,
+          "qmax_minus_q2": 0.5
+        }
+      },
+      "label_rules": {
+        "primary_train_q75": {
+          "n_scored": 41,
+          "n_long_lived": 12,
+          "random_expected_recall": 0.2926829268292683,
+          "oracle_recall": 1.0,
+          "methods": {
+            "cyclewise": {
+              "recall": 0.4166666666666667,
+              "precision": 0.5,
+              "n_selected": 12,
+              "ci_low": 0.125,
+              "ci_high": 0.7142857142857143,
+              "selected": [
+                "b1c0",
+                "b1c1",
+                "b1c10",
+                "b1c11",
+                "b1c15",
+                "b1c2",
+                "b1c21",
+                "b1c22",
+                "b1c25",
+                "b1c30",
+                "b1c4",
+                "b1c41"
+              ],
+              "diff_vs_early_capacity": {
+                "mean": 0.24966100919634202,
+                "ci_low": -0.2,
+                "ci_high": 0.6666666666666666
+              },
+              "diff_vs_delta_q": {
+                "mean": -0.33718471297794056,
+                "ci_low": -0.625,
+                "ci_high": -0.08333333333333326
+              }
+            },
+            "early_capacity": {
+              "recall": 0.16666666666666666,
+              "precision": 0.18181818181818182,
+              "n_selected": 12,
+              "ci_low": 0.0,
+              "ci_high": 0.4166666666666667,
+              "selected": [
+                "b1c16",
+                "b1c19",
+                "b1c26",
+                "b1c31",
+                "b1c33",
+                "b1c39",
+                "b1c40",
+                "b1c44",
+                "b1c45",
+                "b1c7",
+                "b1c8",
+                "b1c9"
+              ]
+            },
+            "delta_q": {
+              "recall": 0.75,
+              "precision": 0.8181818181818182,
+              "n_selected": 12,
+              "ci_low": 0.5,
+              "ci_high": 1.0,
+              "selected": [
+                "b1c0",
+                "b1c1",
+                "b1c11",
+                "b1c14",
+                "b1c2",
+                "b1c22",
+                "b1c23",
+                "b1c3",
+                "b1c4",
+                "b1c40",
+                "b1c41",
+                "b1c5"
+              ]
+            }
+          },
+          "acceleration": {
+            "best_baseline": "delta_q",
+            "target_recall": 0.75,
+            "cyclewise": {
+              "cells_needed": 12,
+              "test_cycles_needed": 15884
+            },
+            "early_capacity": {
+              "cells_needed": 23,
+              "test_cycles_needed": 22853
+            },
+            "delta_q": {
+              "cells_needed": 11,
+              "test_cycles_needed": 15165
+            },
+            "cells_ratio_best_over_cyclewise": 0.9166666666666666,
+            "note": "testing cells in each rule's full rank order until the best baseline's recall@K is matched"
+          }
+        },
+        "secondary_within_batch_q75": {
+          "n_scored": 41,
+          "n_long_lived": 12,
+          "random_expected_recall": 0.2926829268292683,
+          "oracle_recall": 1.0,
+          "methods": {
+            "cyclewise": {
+              "recall": 0.4166666666666667,
+              "precision": 0.5,
+              "n_selected": 12,
+              "ci_low": 0.125,
+              "ci_high": 0.7142857142857143,
+              "selected": [
+                "b1c0",
+                "b1c1",
+                "b1c10",
+                "b1c11",
+                "b1c15",
+                "b1c2",
+                "b1c21",
+                "b1c22",
+                "b1c25",
+                "b1c30",
+                "b1c4",
+                "b1c41"
+              ],
+              "diff_vs_early_capacity": {
+                "mean": 0.24966100919634202,
+                "ci_low": -0.2,
+                "ci_high": 0.6666666666666666
+              },
+              "diff_vs_delta_q": {
+                "mean": -0.33718471297794056,
+                "ci_low": -0.625,
+                "ci_high": -0.08333333333333326
+              }
+            },
+            "early_capacity": {
+              "recall": 0.16666666666666666,
+              "precision": 0.18181818181818182,
+              "n_selected": 12,
+              "ci_low": 0.0,
+              "ci_high": 0.4166666666666667,
+              "selected": [
+                "b1c16",
+                "b1c19",
+                "b1c26",
+                "b1c31",
+                "b1c33",
+                "b1c39",
+                "b1c40",
+                "b1c44",
+                "b1c45",
+                "b1c7",
+                "b1c8",
+                "b1c9"
+              ]
+            },
+            "delta_q": {
+              "recall": 0.75,
+              "precision": 0.8181818181818182,
+              "n_selected": 12,
+              "ci_low": 0.5,
+              "ci_high": 1.0,
+              "selected": [
+                "b1c0",
+                "b1c1",
+                "b1c11",
+                "b1c14",
+                "b1c2",
+                "b1c22",
+                "b1c23",
+                "b1c3",
+                "b1c4",
+                "b1c40",
+                "b1c41",
+                "b1c5"
+              ]
+            }
+          },
+          "acceleration": {
+            "best_baseline": "delta_q",
+            "target_recall": 0.75,
+            "cyclewise": {
+              "cells_needed": 12,
+              "test_cycles_needed": 15884
+            },
+            "early_capacity": {
+              "cells_needed": 23,
+              "test_cycles_needed": 22853
+            },
+            "delta_q": {
+              "cells_needed": 11,
+              "test_cycles_needed": 15165
+            },
+            "cells_ratio_best_over_cyclewise": 0.9166666666666666,
+            "note": "testing cells in each rule's full rank order until the best baseline's recall@K is matched"
+          }
+        }
+      }
+    },
+    "b2": {
+      "n_cells": 43,
+      "n_censored": 0,
+      "n_label_unknown_primary": 0,
+      "n_flagged": 0,
+      "strategy": "A",
+      "rule": {
+        "fit_on": "none",
+        "kind": "zscore_sum",
+        "weights": {
+          "dq_logmin": -0.5,
+          "dq_logvar": -1.0,
+          "qmax_minus_q2": 0.5
+        }
+      },
+      "label_rules": {
+        "primary_train_q75": {
+          "n_scored": 43,
+          "n_long_lived": 0,
+          "random_expected_recall": 0.27906976744186046,
+          "oracle_recall": NaN,
+          "methods": {
+            "cyclewise": {
+              "recall": NaN,
+              "precision": 0.0,
+              "n_selected": 12,
+              "selected": [
+                "b2c18",
+                "b2c2",
+                "b2c20",
+                "b2c27",
+                "b2c28",
+                "b2c29",
+                "b2c30",
+                "b2c31",
+                "b2c32",
+                "b2c34",
+                "b2c41",
+                "b2c47"
+              ]
+            },
+            "early_capacity": {
+              "recall": NaN,
+              "precision": 0.0,
+              "n_selected": 12,
+              "selected": [
+                "b2c14",
+                "b2c20",
+                "b2c21",
+                "b2c22",
+                "b2c26",
+                "b2c33",
+                "b2c36",
+                "b2c37",
+                "b2c39",
+                "b2c40",
+                "b2c42",
+                "b2c43"
+              ]
+            },
+            "delta_q": {
+              "recall": NaN,
+              "precision": 0.0,
+              "n_selected": 12,
+              "selected": [
+                "b2c18",
+                "b2c2",
+                "b2c20",
+                "b2c27",
+                "b2c28",
+                "b2c29",
+                "b2c30",
+                "b2c32",
+                "b2c33",
+                "b2c34",
+                "b2c41",
+                "b2c47"
+              ]
+            },
+            "ref_delta_q_all_train_labels": {
+              "recall": NaN,
+              "precision": 0.0,
+              "n_selected": 12,
+              "selected": [
+                "b2c18",
+                "b2c2",
+                "b2c20",
+                "b2c27",
+                "b2c28",
+                "b2c29",
+                "b2c30",
+                "b2c32",
+                "b2c33",
+                "b2c34",
+                "b2c41",
+                "b2c47"
+              ]
+            }
+          },
+          "undefined": "no long-lived cells under this rule: recall is undefined"
+        },
+        "secondary_within_batch_q75": {
+          "n_scored": 43,
+          "n_long_lived": 12,
+          "random_expected_recall": 0.27906976744186046,
+          "oracle_recall": 1.0,
+          "methods": {
+            "cyclewise": {
+              "recall": 0.4166666666666667,
+              "precision": 0.4166666666666667,
+              "n_selected": 12,
+              "ci_low": 0.125,
+              "ci_high": 0.7142857142857143,
+              "selected": [
+                "b2c18",
+                "b2c2",
+                "b2c20",
+                "b2c27",
+                "b2c28",
+                "b2c29",
+                "b2c30",
+                "b2c31",
+                "b2c32",
+                "b2c34",
+                "b2c41",
+                "b2c47"
+              ],
+              "diff_vs_early_capacity": {
+                "mean": 0.004401999219913811,
+                "ci_low": -0.49999999999999994,
+                "ci_high": 0.5
+              },
+              "diff_vs_delta_q": {
+                "mean": -0.08363318569451965,
+                "ci_low": -0.2728535353535347,
+                "ci_high": -0.0
+              }
+            },
+            "early_capacity": {
+              "recall": 0.4166666666666667,
+              "precision": 0.4166666666666667,
+              "n_selected": 12,
+              "ci_low": 0.125,
+              "ci_high": 0.7,
+              "selected": [
+                "b2c14",
+                "b2c20",
+                "b2c21",
+                "b2c22",
+                "b2c26",
+                "b2c33",
+                "b2c36",
+                "b2c37",
+                "b2c39",
+                "b2c40",
+                "b2c42",
+                "b2c43"
+              ]
+            },
+            "delta_q": {
+              "recall": 0.5,
+              "precision": 0.5,
+              "n_selected": 12,
+              "ci_low": 0.2,
+              "ci_high": 0.8,
+              "selected": [
+                "b2c18",
+                "b2c2",
+                "b2c20",
+                "b2c27",
+                "b2c28",
+                "b2c29",
+                "b2c30",
+                "b2c32",
+                "b2c33",
+                "b2c34",
+                "b2c41",
+                "b2c47"
+              ]
+            },
+            "ref_delta_q_all_train_labels": {
+              "recall": 0.5,
+              "precision": 0.5,
+              "n_selected": 12,
+              "ci_low": 0.2,
+              "ci_high": 0.8,
+              "selected": [
+                "b2c18",
+                "b2c2",
+                "b2c20",
+                "b2c27",
+                "b2c28",
+                "b2c29",
+                "b2c30",
+                "b2c32",
+                "b2c33",
+                "b2c34",
+                "b2c41",
+                "b2c47"
+              ]
+            }
+          },
+          "acceleration": {
+            "best_baseline": "delta_q",
+            "target_recall": 0.5,
+            "cyclewise": {
+              "cells_needed": 13,
+              "test_cycles_needed": 6555
+            },
+            "early_capacity": {
+              "cells_needed": 13,
+              "test_cycles_needed": 6398
+            },
+            "delta_q": {
+              "cells_needed": 12,
+              "test_cycles_needed": 6063
+            },
+            "cells_ratio_best_over_cyclewise": 0.9230769230769231,
+            "note": "testing cells in each rule's full rank order until the best baseline's recall@K is matched"
+          }
+        }
+      }
+    }
+  }
+}

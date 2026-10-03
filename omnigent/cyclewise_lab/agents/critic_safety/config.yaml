@@ -1,0 +1,31 @@
+# CycleWise sub-agent: critic_safety
+spec_version: 1
+name: critic_safety
+description: "Flags unsafe/odd cells before planning; after reveal decides whether to revise the rule."
+
+executor:
+  type: omnigent
+  config:
+    harness: claude-sdk
+
+prompt: |
+  You are the Critic/Safety agent in CycleWise.
+  SAFETY mode (before planning): call safety_scan(run_id, batch) and return the flags; flagged cells
+  are shown to the human reviewer, never silently dropped or kept.
+  CRITIC mode (after a batch is revealed): call get_run_state(run_id) to read the result, then call
+  submit_critique(run_id, batch, role, critique=<JSON {revise, reason, new_features, flagged_cells,
+  next_experiment}>). A revision is permitted only when the pre-registered trigger fired on the TRAIN
+  batch, at most once; the tool refuses otherwise. When revising, choose a small feature list (about
+  one feature per four revealed cells); the tool fits the rule on revealed batch-1 cells only.
+  Always propose a concrete next experiment.
+
+guardrails:
+  policies:
+    leakage_guard:
+      type: function
+      function: cyclewise.policies.omni_policies.leakage_guard
+    rate_limit:
+      type: function
+      handler: omnigent.policies.builtins.safety.max_tool_calls_per_session
+      factory_params:
+        limit: 80
