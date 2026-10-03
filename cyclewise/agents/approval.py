@@ -53,44 +53,53 @@ def render(plan: TestPlan) -> str:
 
 
 def request(run_id: str, plan: TestPlan) -> Approval:
-    print(render(plan), flush=True)
+    """v1: approve a TestPlan."""
+    flagged_sel = [f["cell_id"] for f in plan.flagged_cells if f["cell_id"] in plan.cell_ids]
+    return decide(run_id, plan.plan_id, plan.batch, render(plan), plan.model_dump_json(indent=2), flagged_sel)
+
+
+def decide(run_id: str, plan_id: str, batch: str, text: str, payload_json: str,
+           flagged_in_selection: list[str] | None = None) -> Approval:
+    """Ask a human to approve one decision. Shared by v1 plans and v2 checkpoints.
+
+    demo mode (labeled) -> interactive TTY -> otherwise wait for a decision file, forever.
+    """
+    print(text, flush=True)
+    flagged_in_selection = flagged_in_selection or []
     if demo_auto():
-        a = Approval(plan_id=plan.plan_id, decision="approved", approver="DEMO_AUTO_APPROVE",
+        a = Approval(plan_id=plan_id, decision="approved", approver="DEMO_AUTO_APPROVE",
                      note="DEMO_AUTO_APPROVE=true", demo_auto_approve=True)
         print(">>> DEMO_AUTO_APPROVE=true: plan auto-approved for the demo <<<", flush=True)
     elif sys.stdin.isatty():
         try:
-            return _interactive(run_id, plan)
+            a = _interactive(plan_id, flagged_in_selection)
         except (EOFError, KeyboardInterrupt):
-            research_log.append(run_id, "human", "approval_aborted", {"plan_id": plan.plan_id}, batch=plan.batch)
+            research_log.append(run_id, "human", "approval_aborted", {"plan_id": plan_id}, batch=batch)
             raise SystemExit("\nNo decision given: nothing approved, nothing revealed. Run stopped.")
     else:
-        a = _wait_for_file(plan)
-    research_log.append(run_id, "human", "approval", a.model_dump(), batch=plan.batch, inputs=plan.plan_id)
+        a = _wait_for_file(plan_id, payload_json)
+    research_log.append(run_id, "human", "approval", a.model_dump(), batch=batch, inputs=plan_id)
     return a
 
 
-def _interactive(run_id: str, plan: TestPlan) -> Approval:
+def _interactive(plan_id: str, flagged_in_selection: list[str]) -> Approval:
     ans = input("Approve this plan? [y/N]: ").strip().lower()
     note = input("Note for the planner (optional): ").strip()
     drop: list[str] = []
-    flagged_sel = [f["cell_id"] for f in plan.flagged_cells if f["cell_id"] in plan.cell_ids]
-    if ans == "y" and flagged_sel:
+    if ans == "y" and flagged_in_selection:
         d = input("Drop any flagged cells from the selection? ids comma-separated, blank = keep all: ").strip()
-        drop = [x.strip() for x in d.split(",") if x.strip() in flagged_sel]
-    a = Approval(plan_id=plan.plan_id, decision="approved" if ans == "y" else "rejected",
-                 approver=os.environ.get("USER", "human"), note=note, excluded_flagged=drop)
-    research_log.append(run_id, "human", "approval", a.model_dump(), batch=plan.batch, inputs=plan.plan_id)
-    return a
+        drop = [x.strip() for x in d.split(",") if x.strip() in flagged_in_selection]
+    return Approval(plan_id=plan_id, decision="approved" if ans == "y" else "rejected",
+                    approver=os.environ.get("USER", "human"), note=note, excluded_flagged=drop)
 
 
-def _wait_for_file(plan: TestPlan) -> Approval:
+def _wait_for_file(plan_id: str, payload_json: str) -> Approval:
     d = path(APPROVALS)
     d.mkdir(parents=True, exist_ok=True)
-    (d / f"{plan.plan_id}.request.json").write_text(plan.model_dump_json(indent=2))
-    decision = d / f"{plan.plan_id}.decision.json"
-    print(f"Waiting for a human decision. Run:\n  python -m cyclewise.agents.approval {plan.plan_id} approve "
-          f"\"note\"\n  python -m cyclewise.agents.approval {plan.plan_id} reject \"note\"", flush=True)
+    (d / f"{plan_id}.request.json").write_text(payload_json)
+    decision = d / f"{plan_id}.decision.json"
+    print(f"Waiting for a human decision. Run:\n  python -m cyclewise.agents.approval {plan_id} approve "
+          f"\"note\"\n  python -m cyclewise.agents.approval {plan_id} reject \"note\"", flush=True)
     while not decision.exists():
         time.sleep(2)
     return Approval(**json.loads(decision.read_text()))

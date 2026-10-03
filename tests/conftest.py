@@ -17,8 +17,9 @@ def tmp_log(tmp_path, monkeypatch):
 
 def _warehouse_ready() -> bool:
     from cyclewise.config import load_config, path
+    from cyclewise.v2.data import HIDDEN, SCREEN
     st = load_config()["storage"]
-    return path(st["early_db"]).exists() and path(st["hidden_db"]).exists()
+    return all(path(p).exists() for p in (st["early_db"], st["hidden_db"], SCREEN, HIDDEN))
 
 
 def pytest_collection_modifyitems(config, items):
@@ -27,7 +28,7 @@ def pytest_collection_modifyitems(config, items):
     if _warehouse_ready():
         return
     skip = pytest.mark.skip(reason="warehouse not built: run `python -m cyclewise.data.download`, "
-                                   "`python -m cyclewise.data.load_raw`, `python -m cyclewise.data.splits`")
+                                   "`python -m cyclewise.data.load_raw`, `python -m cyclewise.data.splits`, `python -m cyclewise.v2.data`")
     for item in items:
         if "requires_data" in item.keywords:
             item.add_marker(skip)
