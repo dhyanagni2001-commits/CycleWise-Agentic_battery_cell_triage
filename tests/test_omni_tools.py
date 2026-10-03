@@ -36,6 +36,7 @@ def test_tools_return_errors_instead_of_raising(call, tmp_log):
     assert out["ok"] is False and out["error"]
 
 
+@pytest.mark.requires_data
 def test_one_execution_per_batch(run):
     rid, rule, plan = run
     T.request_approval(rid, plan["plan_id"])
@@ -44,6 +45,7 @@ def test_one_execution_per_batch(run):
     assert again["ok"] is False and "already has an executed plan" in again["error"]
 
 
+@pytest.mark.requires_data
 def test_role_and_revision_count_come_from_the_log(run):
     rid, rule, plan = run
     T.request_approval(rid, plan["plan_id"])
@@ -55,6 +57,7 @@ def test_role_and_revision_count_come_from_the_log(run):
     assert out["ok"] and out["critique"]["trigger"]["thresholds"]
 
 
+@pytest.mark.requires_data
 def test_batch2_must_use_revised_rule(run):
     rid, rule, plan = run
     revised = {"kind": "ridge", "features": ["dq_logvar"], "mean": {"dq_logvar": -4.0},

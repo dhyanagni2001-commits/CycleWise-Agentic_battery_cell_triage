@@ -111,6 +111,8 @@ uv venv --python 3.12 .venv && uv pip install --python .venv -e ".[dev]" omnigen
 .venv/bin/python -m pytest                      # 54 tests
 ```
 
+Without the data (e.g. a fresh clone), `pytest` gives 45 passed and 9 skipped. The 9 tests marked `requires_data` need the built warehouse, and their skip message lists the three data commands.
+
 Expected output of the data steps:
 
 ```

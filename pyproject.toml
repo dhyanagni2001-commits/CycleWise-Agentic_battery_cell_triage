@@ -27,3 +27,4 @@ include = ["cyclewise*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["requires_data: needs the built warehouse (raw data is not in git)"]

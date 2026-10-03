@@ -19,6 +19,7 @@ def tool_event(name, **arguments):
 
 # ---- layer 1: physical separation -------------------------------------------------
 
+@pytest.mark.requires_data
 def test_early_db_has_no_row_past_50_and_no_labels():
     with duckdb.connect(str(path(load_config()["storage"]["early_db"])), read_only=True) as con:
         assert con.execute("SELECT max(cycle) FROM cycles_early_t").fetchone()[0] <= 50
@@ -29,6 +30,7 @@ def test_early_db_has_no_row_past_50_and_no_labels():
     assert not cols & {"cycle_life", "long_lived", "censored", "file_cycle_life"}
 
 
+@pytest.mark.requires_data
 def test_agent_connection_is_read_only():
     with cutoff_view._con() as con:
         with pytest.raises(Exception):
@@ -56,11 +58,13 @@ def test_cycle_51_rejected_by_omnigent_tool_wrapper():
     assert out["ok"] is False
 
 
+@pytest.mark.requires_data
 def test_cycle_50_allowed():
     df = cutoff_view.query_early(batch="b1", max_cycle=50)
     assert df["cycle"].max() == 50
 
 
+@pytest.mark.requires_data
 def test_features_have_no_label_columns():
     df = cutoff_view.get_features("b2")
     assert not {"cycle_life", "long_lived", "censored"} & set(df.columns)
@@ -86,6 +90,7 @@ def test_policy_allows_cycle_50():
 
 # ---- labels unreachable before approval ----------------------------------------------
 
+@pytest.mark.requires_data
 def test_reveal_requires_commit_and_approval(tmp_log):
     run, cells = "t-run", ["b1c5", "b1c6"]
     with pytest.raises(ApprovalError, match="not committed"):

@@ -94,6 +94,7 @@ def test_cache_replays_without_calls(fake_llm):
     assert len(calls) == n and out.cached
 
 
+@pytest.mark.requires_data
 def test_full_loop_with_llm_and_revision(fake_llm, tmp_log, tmp_path, monkeypatch):
     """Two batches through the real loop with the fake model. The trigger thresholds are
     raised IN THIS TEST ONLY so the revision branch runs end to end."""
