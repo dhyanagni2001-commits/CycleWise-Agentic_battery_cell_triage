@@ -14,7 +14,7 @@ import yaml
 
 from cyclewise import prereg
 from cyclewise.config import ROOT, path
-from cyclewise.eval import bootstrap
+from cyclewise.eval import bootstrap, tracking
 from cyclewise.record import research_log
 from cyclewise.record.dblock import connect_ro
 from cyclewise.v2.allocation import Budget
@@ -127,6 +127,12 @@ def evaluate(run_id: str) -> dict:
                         d["claim"] = claim(d["cyclewise_minus_this"], costs["cyclewise"], costs[m], pre)
                     rr["methods"][m] = d
             res["label_rules"][rule_name] = rr
+        prim = res["label_rules"]["primary_within_batch_q75"]["methods"]
+        for m, s in sels.items():  # one MLflow run per strategy per batch (selections already committed)
+            d = prim.get(m, {})
+            tracking.log_selection(f"v2_{m}_{batch}", batch, f"v2_{m}",
+                                   {"run_id": run_id, "role": role, "k_final": b.k_final},
+                                   {"recall_at_k": d.get("recall", float("nan")), "channel_cycles": costs[m]}, s)
         out["batches"][batch] = res
 
     REPORTS.mkdir(exist_ok=True)

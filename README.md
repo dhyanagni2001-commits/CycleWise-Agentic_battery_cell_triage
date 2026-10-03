@@ -15,8 +15,8 @@ The project has two rounds, and the second exists because the first failed:
 | Pipeline (data → features → agents → evaluation) | ✅ Runs end to end from a clean state; reproducible run to run |
 | Tests | ✅ 65 passing (leakage, gates, LLM path, Omnigent bundle, concurrency, v2 paid-data control) |
 | v1 result (one decision at cycle 50) | ❌ CycleWise does **not** beat the ΔQ baseline (see below) |
-| v2 pre-registration | ✅ Committed (`e5725a5`), hash-locked. ⏳ Not yet pushed to GitHub. |
-| v2 sequential loop | ✅ Runs end to end on b1/b2 (development only); ⏳ final test on b3 not run yet, b3 not downloaded |
+| v2 pre-registration | ✅ `e5725a5` + amendment `8ffaa3f`, both hash-locked and pushed before batch 3 was downloaded |
+| **v2 result on the untouched test batch (b3)** | ✅ Recall **0.80**, the same as one-shot ΔQ@100 (Severson's stronger setting), at **9% fewer** channel-cycles, and **62% fewer** than testing every cell to end of life. Not a statistically confirmed win (see below). |
 | Live Claude agents via Omnigent | ⚠️ Run as far as the human approval step; full live results not measured yet |
 | Databricks (Delta, Unity Catalog, dashboard) | ⚠️ Scripts written, untested (no workspace available) |
 
@@ -76,16 +76,38 @@ None reached approval:
 
 **Proof of order.** Commit `e5725a5` adds the pre-registration with its SHA-256 (`ac30f55b…`) before any batch-3 code or data. Every v2 run checks that the file is committed and unchanged, and records the commit hash. Batch 3 can only be loaded through that check.
 
-**Development results on b1/b2** (run `v2-dev-001`, `reports/v2_v2-dev-001.md`). **These are not headline results:** b1 and b2 labels were seen during v1. Deterministic agent policy, `DEMO_AUTO_APPROVE=true`. Primary label (within-batch Q75), recall at k_final with 95% CI, and total channel-cycles:
+**Amendment 1** (`config/prereg_v2_amendment1.yaml`, commit `8ffaa3f`, pushed before batch 3 was downloaded):
+- **A bug found in the first development run.** The cycle-50 options always carried exactly k_final cells to 150, so the 150-cycle decision kept everyone and the "spend cycles near the boundary" design never ran. Fixed: cycle-50 options are now budget splits between the two extension steps.
+- **The default split was chosen on b1 + b2 only,** by mean recall: wide-shallow 0.54, balanced 0.58, **narrow-deep 0.67** (chosen). Because b2 was used for this choice, only b3 counts as a test.
 
-| Batch | CycleWise v2 | One-shot ΔQ@50 | One-shot ΔQ@100 | Test all to EOL | Early capacity |
-|---|---|---|---|---|---|
-| b1 (k=12) | 0.75 [0.50, 1.00] · 18,338 | 0.75 · 17,755 | 0.75 · 19,488 | 1.00 · 42,245 | 0.17 · 11,461 |
-| b2 (k=11) | 0.33 [0.08, 0.62] · 7,783 | 0.42 · 7,143 | 0.42 · 8,928 | 1.00 · 20,348 | 0.42 · 7,017 |
+### v2 result on batch 3 (the untouched test set)
 
-- **b1:** CycleWise matches the recall of both ΔQ rules. It uses 6% fewer channel-cycles than ΔQ@100 (pre-registered claim: *non-inferior and cheaper*) but 3% more than ΔQ@50, and 57% fewer than testing everything.
-- **b2:** CycleWise is worse than both ΔQ rules (−0.08 recall). The Critic's trigger just missed (Spearman 0.51 vs the 0.5 threshold), so no revision happened. Nothing was retuned in response.
-- **b3 (the real test):** not run yet. It needs the pre-registration pushed, then `python -m cyclewise.v2.data --with-b3`.
+Run `v2-final-001` (`reports/v2_v2-final-001.md`), run once with the frozen policy. Deterministic agent policy, `DEMO_AUTO_APPROVE=true` (logged). N = 40 cells (6 noisy channels excluded as pre-registered), k_final = 10, 10 long-lived.
+
+| Strategy | Recall@10 (95% CI) | Channel-cycles | CycleWise − this (95% CI) | Pre-registered claim |
+|---|---|---|---|---|
+| **CycleWise v2** | **0.80** [0.50, 1.00] | **15,475** | | |
+| One-shot ΔQ@100 (Severson's stronger setting) | 0.80 [0.50, 1.00] | 16,997 | −0.00 [−0.30, +0.33] | not better |
+| One-shot ΔQ@50 | 0.60 [0.25, 0.90] | 13,697 | +0.20 [−0.00, +0.50] | not better |
+| Test every cell to end of life | 1.00 | 41,280 | −0.20 [−0.50, −0.00] | not better |
+| Early capacity @50 | 0.30 [0.00, 0.60] | 13,171 | +0.49 [−0.08, +1.00] | not better |
+| Random (expected) | 0.25 | | | |
+
+**What this shows, and what it doesn't:**
+- CycleWise v2 **matched the strongest baseline's recall while spending 9% fewer channel-cycles** (1,522 fewer). Against testing everything, it found 8 of 10 long-lived cells for **62% fewer channel-cycles**.
+- Against one-shot ΔQ@50 it found 2 more long-lived cells (0.80 vs 0.60). The CI's lower bound is −0.00, so this misses the pre-registered "better" bar.
+- With 40 cells, the CIs are wide. By the pre-registered rules **none of the comparisons is a confirmed claim**. Under the secondary label (v1's absolute threshold), it does meet "non-inferior and cheaper" vs ΔQ@100.
+- **Where the gain comes from:** allocation, not prediction. CycleWise stopped 25 cells at cycle 50, carried 15 to cycle 150, then kept the best 10 using the later, stronger ΔQ signal.
+- **The Critic's revision fired after b2** (Spearman 0.25 < 0.5) and refit the 150-cycle rule on 23 revealed b1+b2 cells. That rule uses only ΔQ variance, so it ranks cells exactly like ΔQ alone: the revision did not change which cells were kept on b3.
+- **One b3 cell (b3c17) was flagged for an IR jump** and continued under auto-approval. In a live run, the human sees that flag.
+
+| Batch (role) | CycleWise v2 | ΔQ@50 | ΔQ@100 | Test all |
+|---|---|---|---|---|
+| b1 (train) | 0.75 · 18,277 | 0.75 · 17,755 | 0.75 · 19,488 | 1.00 · 42,245 |
+| b2 (validation; used to choose the split) | 0.58 · 7,905 | 0.42 · 7,143 | 0.42 · 8,928 | 1.00 · 20,348 |
+| **b3 (test)** | **0.80 · 15,475** | 0.60 · 13,697 | 0.80 · 16,997 | 1.00 · 41,280 |
+
+Recall@k_final · channel-cycles, primary label. b1/b2 are development batches.
 
 ## How it works
 
@@ -151,9 +173,9 @@ Without the data (e.g. a fresh clone), `pytest` gives 53 passed and 12 skipped. 
 **v2 loop:**
 
 ```bash
-DEMO_AUTO_APPROVE=true CYCLEWISE_LLM=offline .venv/bin/python -m cyclewise.v2.loop   # b1, b2 (and b3 if built)
-.venv/bin/python -m cyclewise.v2.data --with-b3     # ONLY after the pre-registration is pushed: downloads + loads b3
-.venv/bin/python -m cyclewise.v2.loop               # full v2 run incl. the b3 test; approvals at every checkpoint
+.venv/bin/python -m cyclewise.v2.data --with-b3     # verifies the pre-registration, downloads + loads b3
+DEMO_AUTO_APPROVE=true CYCLEWISE_LLM=offline .venv/bin/python -m cyclewise.v2.loop   # b1 -> b2 -> b3, labeled demo
+.venv/bin/python -m cyclewise.v2.loop               # same, with a human approval at every checkpoint
 ```
 
 Reports are written to `reports/v2_<run_id>.md` and `.json`.
@@ -308,7 +330,9 @@ reports/           generated results per run
 - Retrospective evaluation only. No physical test time was saved.
 - Small samples: 41 and 43 scored cells. CIs are wide, and most differences are not distinguishable from zero.
 - One chemistry (LFP/graphite), one temperature (30 °C), fast-charge protocols only.
-- v2's design was written after seeing b1/b2 labels (stated in the pre-registration). Only b3 results are claims; b1/b2 v2 numbers are development results.
+- v2's design was written after seeing b1/b2 labels, and the budget split was chosen on b1/b2 (both stated in the pre-registration and amendment). Only b3 results are claims.
+- b3 has 40 cells. The CIs are too wide for any pre-registered claim to pass; the b3 result is a point estimate, not a confirmed improvement.
+- The b3 run used the deterministic agent policy with labeled auto-approval. The live LLM agents with human approvals have not been run on v2.
 - Batch 2 is shorter-lived than batch 1, so the pre-registered absolute threshold yields no positives there.
 - The revised-rule path (Critic re-fits on revealed cells) did not trigger in the measured run, so it is tested only by unit tests.
 - Censored cells contribute lower bounds when fitting revised rules.
@@ -317,8 +341,8 @@ reports/           generated results per run
 
 ## Next experiment
 
-1. Push the v2 pre-registration, then run v2 on batch 3 (the untouched test set) and report the table above for b3.
-2. Complete a live Omnigent run with human approvals at each checkpoint, and record it.
+1. Complete a live Omnigent run with human approvals at each checkpoint, and record it.
+2. More cells. With 40 per batch, a 0.20 recall difference cannot be confirmed; roughly 4x the cells would be needed.
 3. Run v2 prospectively on new cells, then on a second chemistry.
 
 ## Citations
