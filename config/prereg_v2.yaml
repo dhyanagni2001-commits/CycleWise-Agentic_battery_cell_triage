@@ -1,0 +1,125 @@
+# CycleWise v2 PRE-REGISTRATION
+#
+# Written 2026-10-03, BEFORE batch 3 (2018-04-12) was downloaded or opened.
+# Proof: this file is committed to git before any batch-3 code path runs; the
+# commit hash is recorded in every v2 run_start row. Do not edit after that
+# commit. A v2 run refuses to start if this file's hash differs from the hash
+# frozen at commit time (config/prereg_v2.lock).
+#
+# What was already known when this was written (stated, not hidden):
+#   - v1 results on b1/b2: CycleWise (one decision at cycle 50) lost to the
+#     one-shot ΔQ-variance rule; the absolute long-lived threshold (b1 Q75)
+#     gave zero positives on b2 (batch shift).
+#   - b1 and b2 labels have been seen. They are therefore used only as train
+#     (b1) and validation (b2). Every v2 headline claim is made on b3 only.
+#   - The authors' list of noisy b3 channels (exclusion info, not outcomes).
+# Nothing about b3 outcomes, features or cycle data is known.
+
+version: 2
+
+why_v2: >
+  v1 asked the agents to out-predict ΔQ from one 50-cycle snapshot. v2 changes
+  the experiment design instead: ΔQ (Severson 2019) is adopted, cited, as the
+  base signal, and the lab's job is ALLOCATION over sequential checkpoints:
+  stop clear losers early, spend extra cycles only where the decision is
+  uncertain, and keep a fixed number of cells to end of life.
+
+batches:
+  b1: {name: "2017-05-12", role: train}        # revision allowed after this batch
+  b2: {name: "2017-06-30", role: validation}   # revision allowed after this batch (if triggered)
+  b3:
+    name: "2018-04-12"
+    role: test                                 # rule FROZEN; all headline claims
+    file: cyclewise/data/raw/2018-04-12_batchdata_updated_struct_errorcorrect.mat
+    url: https://data.matr.io/1/api/v1/file/5c86bd64fa2ede00015ddbb2/download
+    bytes: 3236690412
+    # Noisy channels removed by the authors' reference loader ("Load Data.ipynb"):
+    exclude: [b3c2, b3c23, b3c32, b3c37, b3c42, b3c43]
+
+labels:
+  # Primary label changes from v1: the absolute b1-Q75 threshold produced no
+  # positives on b2 (batch shift), so v2 uses a WITHIN-batch rule.
+  primary: within_batch_quantile
+  quantile: 0.75            # long-lived = cycle life >= the batch's own 75th percentile
+  ties: ">="                # ties at the threshold count as long-lived
+  censoring: >
+    Censored cells contribute their last cycle as a lower bound. A censored cell
+    whose bound is below the threshold has an unknown label: excluded from
+    scoring and counted in the report.
+  secondary: absolute_v1    # v1 frozen threshold (config/frozen.yaml), reported for continuity
+  eol_capacity_ah: 0.88
+
+checkpoints:
+  cycles: [50, 100, 150]    # every eligible cell is screened to 50
+  reference_cycle: 10       # ΔQ_c(V) = Q_c(V) - Q_10(V)
+  decisions:
+    at_50:  [continue_to_100, stop, flag_for_review]
+    at_100: [continue_to_150, stop, flag_for_review]
+    at_150: [keep_to_eol, stop]
+  flagged: "flagged cells go to the human at the approval step; never silently kept or dropped"
+  approval: "a human approves the decision set at EVERY checkpoint before any newly paid-for data is revealed"
+
+budget:
+  unit: channel_cycles
+  # N = eligible cells in the batch after exclusions (label-free count).
+  k_final: "round(0.25 * N)"                    # cells kept to end of life (matches the top-quartile label)
+  extension_budget: "50 * ceil(0.75 * N)"       # channel-cycles for extensions 50->100 and 100->150
+  rules:
+    - "at least k_final cells must reach cycle 150 (the final pick is made there)"
+    - "an extension request over the remaining budget is rejected; the Planner re-proposes (max 2), then
+       the deterministic fallback ranks requested extensions by score, cuts at the budget, ties by cell id"
+    - "a cell that reaches end of life before the next checkpoint: its EOL is logged, it costs
+       (EOL - checkpoint) channel-cycles, and it needs no further extension"
+
+cost_accounting:   # computed by the scoring harness, identical for every strategy
+  screening: "sum over eligible cells of min(EOL, 50)"
+  extensions: "for each extension actually run from c to c', min(EOL, c') - c"
+  to_eol: "for each kept cell, EOL - (cycle at which it was kept)"
+  total: "screening + extensions + to_eol  (channel-cycles)"
+
+comparators:       # all keep exactly k_final cells to end of life, same labels, same cost accounting
+  test_all_to_eol: "every eligible cell cycled to EOL (what labs do); recall 1 by construction"
+  one_shot_dq50:   "keep top k_final by lowest log var ΔQ_50 at cycle 50"
+  one_shot_dq100:  "everyone to cycle 100, keep top k_final by lowest log var ΔQ_100 (Severson's stronger setting)"
+  early_capacity50: "keep top k_final by discharge capacity near cycle 50 (v1 continuity)"
+  random_expected: "k_final / N"
+  oracle: "min(1, k_final / n_long_lived)"
+
+agents:
+  evidence: "adopts log var ΔQ_c (Severson 2019, cited) as the base signal at each checkpoint; may add features, logged"
+  planner: "at each checkpoint proposes >= 2 allocation options (how many to continue / keep), within budget"
+  critic: "after each batch decides whether to revise the scoring rule; never on b3"
+  leakage: >
+    Agents see only data the lab has paid for: cycles <= 50 for every cell, and
+    cycles up to c only for cells actually extended to checkpoint c. Paid-for
+    data is materialised into the run's agent-visible database only after the
+    checkpoint decision is approved and committed. Labels (EOL) are visible only
+    for cells that reached EOL inside the paid-for window or were kept to EOL.
+
+revision:
+  allowed_after: [b1, b2]
+  frozen_on: [b3]
+  max_per_batch: 1
+  trigger: "Spearman(final-checkpoint score, log10 cycle life) over the batch's revealed cells < 0.5"
+  new_rule: >
+    Ridge regression of log10 cycle life on standardised final-checkpoint
+    features, fit ONLY on revealed cells of train/validation batches seen so
+    far; alpha by leave-one-out on those cells; executable JSON artifact.
+
+analysis:
+  headline_batch: b3
+  primary_metric: "recall of long-lived cells (primary label) among the k_final cells kept to EOL"
+  cost_metric: "total channel-cycles (cost_accounting.total)"
+  savings: "channel-cycles saved vs test_all_to_eol, and vs one_shot_dq100"
+  ci: {method: bootstrap over cells, resamples: 2000, level: 0.95, seed: 20261003}
+  paired: "recall difference CycleWise minus each comparator, same resamples"
+  claim_rules:
+    better: "paired recall-difference CI lower bound > 0"
+    non_inferior_and_cheaper: "paired recall-difference CI lower bound > -0.10 AND lower total channel-cycles"
+    otherwise: "report as not better; no rewording"
+  report_everything: "all comparators, all batches, both label rules, excluded/censored/flagged counts"
+
+forbidden:
+  - "changing anything in this file after its commit"
+  - "re-tuning on b1/b2 labels to improve the v1 result (v1 stays reported as is)"
+  - "looking at b3 cycle data or outcomes outside a logged v2 run"
