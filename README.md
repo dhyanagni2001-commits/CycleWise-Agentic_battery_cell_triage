@@ -6,7 +6,7 @@ Testing one battery cell until it wears out takes weeks. A lab can't test every 
 
 The code package is still named `cyclewise` (the project's working name), so commands and folders use that name.
 
-**Demo:** [interactive replay of the logged runs](https://claude.ai/artifact/CAC2xACXT5Tq8iVduzMkaJ) (also in [`demo/cyclewise-replay.html`](demo/cyclewise-replay.html); open it in a browser).
+**Demo:** [interactive replay of the logged runs](https://claude.ai/artifact/CAC2xACXT5Tq8iVduzMkaJ) (also in [`demo/first-fifty-replay.html`](demo/first-fifty-replay.html); open it in a browser).
 
 Built for Hack-Nation x Databricks, Challenge 03 "Agentic Scientific Discovery", using the public battery dataset from Severson et al., *Nature Energy* 2019.
 

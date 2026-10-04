@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><title>CycleWise Run Replay</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"></head><body><title>First Fifty Replay</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap">
@@ -115,8 +115,8 @@ footer{font-size:13px; color:var(--muted)}
 <div class="wrap">
 <header>
   <div class="eyebrow">Hack-Nation x Databricks · Challenge 03 · Agentic Scientific Discovery</div>
-  <h1>CycleWise run replay</h1>
-  <p class="lede">A team of AI agents decides which battery cells deserve a full life test, seeing only their early cycles. This page replays real logged runs, step by step: every option, decision, reason and cell below comes from the research log.</p>
+  <h1>First Fifty</h1>
+  <p class="lede"><b>Omnigent agents that decide which battery cells deserve a full life test, after only 50 cycles.</b> A team of Claude agents, run by Omnigent, decides which battery cells deserve a full life test, seeing only their early cycles. This page replays real logged runs, step by step: every option, decision, reason and cell below comes from the research log.</p>
   <div class="tabs" role="tablist" id="runtabs" aria-label="Choose a run"></div>
   <div class="chips">
     <span class="chip">run <span id="runid"></span></span>
@@ -177,14 +177,14 @@ footer{font-size:13px; color:var(--muted)}
   <div class="eyebrow">Run it yourself</div>
   <h2 id="run-h">The working system</h2>
   <p>The agents run in <a href="https://omnigent.ai" target="_blank" rel="noopener">Omnigent</a> with Claude, and a person approves every checkpoint before new data is revealed. The full code, tests and reports are on GitHub.</p>
-  <pre>git clone https://github.com/dhyanagni2001-commits/CycleWise-Agentic_battery_cell_triage.git
-cd CycleWise-Agentic_battery_cell_triage
+  <pre>git clone https://github.com/dhyanagni2001-commits/First Fifty-Agentic_battery_cell_triage.git
+cd First Fifty-Agentic_battery_cell_triage
 uv venv --python 3.12 .venv &amp;&amp; uv pip install --python .venv -e ".[dev]" omnigent
 .venv/bin/python -m cyclewise.data.download
 .venv/bin/python -m cyclewise.data.load_raw &amp;&amp; .venv/bin/python -m cyclewise.data.splits
 .venv/bin/python -m cyclewise.v2.data --with-b3
-.venv/bin/omni run omnigent/cyclewise_v2      # then type: Run the CycleWise v2 study</pre>
-  <p><a href="https://github.com/dhyanagni2001-commits/CycleWise-Agentic_battery_cell_triage" target="_blank" rel="noopener">Open the repository on GitHub</a></p>
+.venv/bin/omni run omnigent/cyclewise_v2      # then type: Run the First Fifty study</pre>
+  <p><a href="https://github.com/dhyanagni2001-commits/First Fifty-Agentic_battery_cell_triage" target="_blank" rel="noopener">Open the repository on GitHub</a></p>
 </section>
 
 <footer>Data: Severson et al., "Data-driven prediction of battery cycle life before capacity degradation", <i>Nature Energy</i> 4, 383–391 (2019), dataset from data.matr.io (CC BY 4.0). Labels for cells that were stopped early are shown only in the after-the-run scoring view.</footer>
@@ -199,7 +199,7 @@ let D = ALL.runs[runKey];
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => n.toLocaleString("en-US");
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const NAMES = {cw_live:"CycleWise · live agents", cw_policy:"CycleWise · frozen policy", cyclewise:"CycleWise", one_shot_dq100:"ΔQ at cycle 100", one_shot_dq50:"ΔQ at cycle 50",
+const NAMES = {cw_live:"First Fifty · live agents", cw_policy:"First Fifty · frozen policy", cyclewise:"First Fifty", one_shot_dq100:"ΔQ at cycle 100", one_shot_dq50:"ΔQ at cycle 50",
                early_capacity50:"Early capacity", test_all_to_eol:"Test every cell"};
 const ORDER = ["cw_live","cw_policy","one_shot_dq100","one_shot_dq50","early_capacity50","test_all_to_eol"];
 const CLAIM = {not_better:"not confirmed", better:"better", non_inferior_and_cheaper:"non-inferior and cheaper"};
