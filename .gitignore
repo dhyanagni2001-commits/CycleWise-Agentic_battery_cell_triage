@@ -9,3 +9,6 @@ cache/
 .pytest_cache/
 .env
 *.egg-info/
+demo/*.mp4
+.DS_Store
+demo/sync_check.png
