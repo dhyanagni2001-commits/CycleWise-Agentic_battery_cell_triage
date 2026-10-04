@@ -10,7 +10,7 @@ def v2_submit_critique(run_id: str, batch: str, critique: str) -> dict:
     """After checkpoint 150: JSON {revise, reason, new_features, next_experiment}. Revision is refused unless the pre-registered trigger (Spearman < 0.5 on revealed cells) fired on a b1/b2 batch.
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
         batch: Batch key, e.g. 'b1' or 'b2'.
         critique: CritiqueDraft JSON string.
     """

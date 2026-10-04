@@ -10,7 +10,7 @@ def v2_checkpoint_options(run_id: str, batch: str) -> dict:
     """The options for the batch's NEXT checkpoint (50, 100 or 150): all within budget, >= 2 of them, plus the top of the current ranking and the remaining budget.
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
         batch: Batch key, e.g. 'b1' or 'b2'.
     """
     return omni_tools_v2.v2_checkpoint_options(run_id=run_id, batch=batch)

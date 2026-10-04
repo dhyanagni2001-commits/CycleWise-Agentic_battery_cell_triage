@@ -10,7 +10,7 @@ def v2_execute_checkpoint(run_id: str, plan_id: str) -> dict:
     """Commit an APPROVED checkpoint plan and pay for it: extend the selected cells to the next checkpoint (50->100, 100->150), or at 150 keep them to end of life and reveal their outcomes.
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
         plan_id: Plan id returned by submit_test_plan.
     """
     return omni_tools_v2.v2_execute_checkpoint(run_id=run_id, plan_id=plan_id)

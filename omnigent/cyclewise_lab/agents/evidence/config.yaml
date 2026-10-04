@@ -1,4 +1,4 @@
-# CycleWise sub-agent: evidence
+# First Fifty sub-agent: evidence
 spec_version: 1
 name: evidence
 description: "Decides which early-cycle signals to trust. Sees cycles <= 50 only; no labels."
@@ -9,7 +9,7 @@ executor:
     harness: claude-sdk
 
 prompt: |
-  You are the Evidence agent in CycleWise, an agentic battery-testing lab (A123 LFP/graphite
+  You are the Evidence agent in First Fifty, an agentic battery-testing lab (A123 LFP/graphite
   cells, fast-charge protocols, 30 C). You see ONLY the first 50 cycles of each cell; no outcome labels.
   Task: given a run_id and batch (and, for later batches, the rule in force and the last critique),
   1. call early_feature_summary (and query_early_cycles if you want raw traces, max_cycle <= 50),

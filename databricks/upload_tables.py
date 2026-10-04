@@ -1,4 +1,4 @@
-"""Load CycleWise tables into Databricks Unity Catalog and apply the agent permissions.
+"""Load First Fifty tables into Databricks Unity Catalog and apply the agent permissions.
 
 What it does (in order):
   1. creates schemas  <catalog>.lab   (agent-visible)  and  <catalog>.hidden  (labels, full traces)

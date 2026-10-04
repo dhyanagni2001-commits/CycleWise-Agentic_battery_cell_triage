@@ -10,7 +10,7 @@ def v2_safety_scan(run_id: str, batch: str) -> dict:
     """Flag hot cells, IR jumps and missing sensors in cycles 2..50. Flags go to the human at approval.
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
         batch: Batch key, e.g. 'b1' or 'b2'.
     """
     return omni_tools_v2.v2_safety_scan(run_id=run_id, batch=batch)

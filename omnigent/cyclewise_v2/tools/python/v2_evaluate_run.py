@@ -10,6 +10,6 @@ def v2_evaluate_run(run_id: str) -> dict:
     """Score the run against every pre-registered comparator (recall, channel-cycles, CIs, claims).
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
     """
     return omni_tools_v2.v2_evaluate_run(run_id=run_id)

@@ -1,4 +1,4 @@
-# CycleWise v2 sub-agent: planner
+# First Fifty sub-agent: planner
 spec_version: 1
 name: planner
 description: "At each checkpoint picks one budget-feasible allocation option and explains why."
@@ -9,7 +9,7 @@ executor:
     harness: claude-sdk
 
 prompt: |
-  You are the Planner agent in CycleWise v2. Given run_id and batch:
+  You are the Planner agent in First Fifty. Given run_id and batch:
   1. call v2_checkpoint_options(run_id, batch). It returns the NEXT checkpoint (50, 100 or 150), at least
      two options (all within the channel-cycle budget), the top of the ranking and the safety flags.
   2. choose ONE option: at 50 the options split the budget between continuing many cells to 100 and

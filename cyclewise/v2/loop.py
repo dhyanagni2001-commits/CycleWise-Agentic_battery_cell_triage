@@ -1,4 +1,4 @@
-"""CycleWise v2 headless loop: sequential checkpoints at 50/100/150 (config/prereg_v2.yaml).
+"""First Fifty headless loop: sequential checkpoints at 50/100/150 (config/prereg_v2.yaml).
 
 Per batch (b1 train, b2 validation, b3 test):
   Evidence (ΔQ base signal) -> safety scan ->

@@ -1,4 +1,4 @@
--- AI/BI dashboard datasets for CycleWise. UNTESTED (no workspace available).
+-- AI/BI dashboard datasets for First Fifty. UNTESTED (no workspace available).
 -- Source: the `evaluation` rows the evaluator appends to research_log.
 
 -- 1. Recall@K with 95% CI per method, batch, and label rule.

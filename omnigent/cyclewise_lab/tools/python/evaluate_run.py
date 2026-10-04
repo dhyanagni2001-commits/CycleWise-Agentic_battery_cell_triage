@@ -10,6 +10,6 @@ def evaluate_run(run_id: str) -> dict:
     """Score the committed selections against both baselines with bootstrap CIs.
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
     """
     return omni_tools.evaluate_run(run_id=run_id)

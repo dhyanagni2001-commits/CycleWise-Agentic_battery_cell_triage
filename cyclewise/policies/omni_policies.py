@@ -1,4 +1,4 @@
-"""Omnigent policies for CycleWise (referenced from omnigent/cyclewise_lab/config.yaml).
+"""Omnigent policies for First Fifty (referenced from omnigent/cyclewise_lab/config.yaml).
 
 Policy callables receive an Omnigent PolicyEvent dict and return
 {"result": "ALLOW" | "ASK" | "DENY", "reason": ...} or None (abstain).
@@ -114,11 +114,11 @@ def budget_guard(event: dict) -> dict | None:
 
 POLICY_REGISTRY = [
     {"handler": "cyclewise.policies.omni_policies.leakage_guard", "kind": "function",
-     "name": "CycleWise leakage guard", "description": "Deny cycle > 50 and hidden-table access."},
+     "name": "First Fifty leakage guard", "description": "Deny cycle > 50 and hidden-table access."},
     {"handler": "cyclewise.policies.omni_policies.approval_gate", "kind": "function",
-     "name": "CycleWise approval gate", "description": "Human must approve every test plan."},
+     "name": "First Fifty approval gate", "description": "Human must approve every test plan."},
     {"handler": "cyclewise.policies.omni_policies.reveal_gate", "kind": "function",
-     "name": "CycleWise reveal gate", "description": "No reveal without a recorded approval."},
+     "name": "First Fifty reveal gate", "description": "No reveal without a recorded approval."},
     {"handler": "cyclewise.policies.omni_policies.budget_guard", "kind": "function",
-     "name": "CycleWise budget guard", "description": "Deny plans over the cell budget."},
+     "name": "First Fifty budget guard", "description": "Deny plans over the cell budget."},
 ]

@@ -1,4 +1,4 @@
-"""Omnigent tools for CycleWise v2 (sequential checkpoints at 50/100/150).
+"""Omnigent tools for First Fifty (sequential checkpoints at 50/100/150).
 
 Referenced by the generated files in omnigent/cyclewise_v2/**/tools/python/.
 All run state (rule in force, budget spent, next checkpoint, revised rule) is
@@ -127,7 +127,7 @@ def _plan(run_id: str, plan_id: str) -> dict:
 
 @safe
 def v2_start_run() -> dict:
-    """Start a CycleWise v2 run (checkpoints 50/100/150). Returns run_id, batches with roles, budgets."""
+    """Start a First Fifty run (checkpoints 50/100/150). Returns run_id, batches with roles, budgets."""
     meta = prereg.verify()
     rl = roles()
     run_id = f"omni2-{uuid.uuid4().hex[:8]}"

@@ -80,7 +80,7 @@ def _log(run_id, batch, agent, event, out, inputs, outcome):
 
 # ---------------------------------------------------------------- Evidence
 
-EVIDENCE_SYSTEM = """You are the Evidence agent in CycleWise v2, a battery lab that decides at cycles 50,
+EVIDENCE_SYSTEM = """You are the Evidence agent in First Fifty, a battery lab that decides at cycles 50,
 100 and 150 which cells to keep testing. Pre-registered: log10 var(ΔQ_c) (Severson 2019) is the base
 signal (direction -1, the largest weight). You may add up to 4 supporting features from the catalog
 with smaller weights if you can justify them from published evidence. Cite only allowed ids. You see
@@ -106,7 +106,7 @@ def evidence(run_id: str, batch: str, n_cells: int, critique: dict | None) -> Ev
 
 # ---------------------------------------------------------------- Planner
 
-PLANNER_SYSTEM = """You are the Planner agent in CycleWise v2. At each checkpoint you choose ONE of the
+PLANNER_SYSTEM = """You are the Planner agent in First Fifty. At each checkpoint you choose ONE of the
 listed allocation options (by option_id); all are within the channel-cycle budget. Trade-off:
 continuing more cells costs cycles but lowers the chance of stopping a long-lived cell whose early
 score was misleading. Cells that are clearly worst can be stopped early. At cycle 150 you choose how
@@ -138,7 +138,7 @@ def planner(run_id: str, batch: str, checkpoint: int, options: list[dict], conte
 
 # ---------------------------------------------------------------- Critic
 
-CRITIC_SYSTEM = """You are the Critic in CycleWise v2. After a batch, a pre-registered trigger decides
+CRITIC_SYSTEM = """You are the Critic in First Fifty. After a batch, a pre-registered trigger decides
 whether the final-checkpoint scoring rule may be revised (never on the test batch). If revision is
 permitted, choose a small feature list (about one feature per four revealed cells, dq_logvar first);
 a tool fits the rule on revealed cells only. Always propose the next experiment."""

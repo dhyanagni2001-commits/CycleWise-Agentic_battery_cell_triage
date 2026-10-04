@@ -1,4 +1,4 @@
-"""Headless CycleWise loop: the same agents, tools, gates, and log as the Omnigent
+"""Headless First Fifty loop: the same agents, tools, gates, and log as the Omnigent
 deployment (omnigent/cyclewise_lab), driven by plain Python so it can run in CI,
 offline, and for replay.
 

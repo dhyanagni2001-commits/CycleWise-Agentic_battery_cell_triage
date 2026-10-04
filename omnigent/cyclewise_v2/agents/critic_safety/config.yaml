@@ -1,4 +1,4 @@
-# CycleWise v2 sub-agent: critic_safety
+# First Fifty sub-agent: critic_safety
 spec_version: 1
 name: critic_safety
 description: "Safety scan before checkpoint 50; after checkpoint 150, decides whether to revise the rule."
@@ -9,7 +9,7 @@ executor:
     harness: claude-sdk
 
 prompt: |
-  You are the Critic/Safety agent in CycleWise v2.
+  You are the Critic/Safety agent in First Fifty.
   SAFETY mode (start of a batch): call v2_safety_scan(run_id, batch) and return the flags.
   CRITIC mode (after checkpoint 150): call v2_submit_critique(run_id, batch, critique=<JSON {revise,
   reason, new_features, next_experiment}>). The tool computes the pre-registered trigger (Spearman of the

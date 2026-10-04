@@ -10,7 +10,7 @@ def v2_submit_choice(run_id: str, batch: str, option_id: str, reason: str) -> di
     """Choose one option for the next checkpoint. Cell ids come from the ranking, never from the agent. Returns the plan (plan_id, cells to continue/keep, cells stopped) for the supervisor to approve.
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
         batch: Batch key, e.g. 'b1' or 'b2'.
         option_id: Option id from v2_checkpoint_options, e.g. 'C'.
         reason: Why this option (>= 10 characters).

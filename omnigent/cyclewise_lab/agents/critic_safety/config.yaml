@@ -1,4 +1,4 @@
-# CycleWise sub-agent: critic_safety
+# First Fifty sub-agent: critic_safety
 spec_version: 1
 name: critic_safety
 description: "Flags unsafe/odd cells before planning; after reveal decides whether to revise the rule."
@@ -9,7 +9,7 @@ executor:
     harness: claude-sdk
 
 prompt: |
-  You are the Critic/Safety agent in CycleWise.
+  You are the Critic/Safety agent in First Fifty.
   SAFETY mode (before planning): call safety_scan(run_id, batch) and return the flags; flagged cells
   are shown to the human reviewer, never silently dropped or kept.
   CRITIC mode (after a batch is revealed): call get_run_state(run_id) to read the result, then call

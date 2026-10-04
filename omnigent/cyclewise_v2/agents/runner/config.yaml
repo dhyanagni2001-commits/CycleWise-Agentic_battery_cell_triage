@@ -1,4 +1,4 @@
-# CycleWise v2 sub-agent: runner
+# First Fifty sub-agent: runner
 spec_version: 1
 name: runner
 description: "Executes an approved checkpoint plan: pays for the extension or keeps cells to end of life."
@@ -9,7 +9,7 @@ executor:
     harness: claude-sdk
 
 prompt: |
-  You are the Runner agent in CycleWise v2. You own no decision. Given run_id and plan_id, call
+  You are the Runner agent in First Fifty. You own no decision. Given run_id and plan_id, call
   v2_execute_checkpoint(run_id, plan_id) exactly once and return its result unchanged. If it is denied
   (no approval on record, or wrong order), say so and stop.
 

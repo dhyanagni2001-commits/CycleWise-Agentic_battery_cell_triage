@@ -1,4 +1,4 @@
--- CycleWise on Databricks: Unity Catalog layout and permissions.
+-- First Fifty on Databricks: Unity Catalog layout and permissions.
 -- UNTESTED in this repo (no workspace was available during the build); mirrors the
 -- local two-database split in cyclewise/data/splits.py. Replace the placeholders:
 --   ${catalog}         e.g. cyclewise

@@ -10,7 +10,7 @@ def execute_plan(run_id: str, plan_id: str) -> dict:
     """Commit the selection, reveal outcomes of the kept cells (requires approval), log MLflow.
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
         plan_id: Plan id returned by submit_test_plan.
     """
     return omni_tools.execute_plan(run_id=run_id, plan_id=plan_id)

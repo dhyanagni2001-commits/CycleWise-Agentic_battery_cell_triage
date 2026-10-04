@@ -10,7 +10,7 @@ def submit_critique(run_id: str, batch: str, role: str, critique: str, revisions
     """Validate a CritiqueDraft JSON {revise, reason, new_features, flagged_cells, next_experiment}. Revision is refused unless the pre-registered trigger fired on the train batch. Role and the revision count are read from config and the log; the role/revisions_used arguments are ignored.
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
         batch: Batch key, e.g. 'b1' or 'b2'.
         role: Batch role: 'train' or 'eval'.
         critique: CritiqueDraft JSON string.

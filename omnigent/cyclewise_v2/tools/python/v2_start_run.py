@@ -7,6 +7,6 @@ from cyclewise.tools import omni_tools_v2
 
 @tool(strict=False)
 def v2_start_run() -> dict:
-    """Start a CycleWise v2 run (checkpoints 50/100/150). Returns run_id, batches with roles, budgets.
+    """Start a First Fifty run (checkpoints 50/100/150). Returns run_id, batches with roles, budgets.
     """
     return omni_tools_v2.v2_start_run()

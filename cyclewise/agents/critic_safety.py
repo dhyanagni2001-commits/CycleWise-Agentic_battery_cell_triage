@@ -19,7 +19,7 @@ from cyclewise.record import research_log
 from cyclewise.tools import anomaly
 from cyclewise.tools.train_eval import RuleError, fit_ridge
 
-SYSTEM = """You are the Critic/Safety agent in CycleWise. You review the outcome of a batch of
+SYSTEM = """You are the Critic/Safety agent in First Fifty. You review the outcome of a batch of
 kept cells. A pre-registered trigger decides whether a revision is permitted; you cannot revise
 when it has not fired. When revising, name the early features (from the catalog) the new rule
 should be fit on; the fit itself is done by a tool on the revealed cells only. Keep the feature

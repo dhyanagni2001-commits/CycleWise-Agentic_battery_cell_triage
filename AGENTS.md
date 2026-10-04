@@ -1,4 +1,4 @@
-# CycleWise agent specs and policies
+# First Fifty agent specs and policies
 
 There are two Omnigent setups. **Use v2** unless you are reproducing the earlier result.
 

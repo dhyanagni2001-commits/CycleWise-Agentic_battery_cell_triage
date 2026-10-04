@@ -10,6 +10,6 @@ def get_run_state(run_id: str) -> dict:
     """Latest hypothesis, plan, result, critique and revised rule for a run (no labels of unrevealed cells).
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
     """
     return omni_tools.get_run_state(run_id=run_id)

@@ -1,8 +1,10 @@
-# CycleWise
+# First Fifty
 
-**Built on [Omnigent](https://omnigent.ai): a team of Claude agents that decides which battery cells are worth testing to the end, after seeing only their first cycles.**
+**[Omnigent](https://omnigent.ai) agents that decide which battery cells deserve a full life test, after only 50 cycles.**
 
-Testing one battery cell until it wears out takes weeks. A lab can't test every cell, so it has to guess early which cells will last longest. In CycleWise, **Omnigent** runs a team of five Claude agents that make those calls under a fixed budget. Omnigent's policies keep the agents away from data they haven't paid for, and Omnigent asks a person to approve every decision before any results are revealed.
+Testing one battery cell until it wears out takes weeks. A lab can't test every cell, so it has to guess early which cells will last longest. In First Fifty, **Omnigent** runs a team of five Claude agents that make those calls under a fixed budget. Omnigent's policies keep the agents away from data they haven't paid for, and Omnigent asks a person to approve every decision before any results are revealed.
+
+The code package is still named `cyclewise` (the project's working name), so commands and folders use that name.
 
 **Demo:** [interactive replay of the logged runs](https://claude.ai/artifact/CAC2xACXT5Tq8iVduzMkaJ) (also in [`demo/cyclewise-replay.html`](demo/cyclewise-replay.html); open it in a browser).
 
@@ -10,12 +12,12 @@ Built for Hack-Nation x Databricks, Challenge 03 "Agentic Scientific Discovery",
 
 ## Result
 
-On a batch of 40 cells that was kept sealed until the plan was locked in, CycleWise was run two ways:
+On a batch of 40 cells that was kept sealed until the plan was locked in, First Fifty was run two ways:
 
 | Approach | Long-lived cells found | Test cycles used |
 |---|---|---|
-| **CycleWise, live Claude agents in Omnigent, every step approved by a person** | **7 of 10** | **15,338** |
-| **CycleWise, frozen policy, automatic approvals** | **8 of 10** | **15,475** |
+| **First Fifty, live Claude agents in Omnigent, every step approved by a person** | **7 of 10** | **15,338** |
+| **First Fifty, frozen policy, automatic approvals** | **8 of 10** | **15,475** |
 | Best published method (ΔQ at cycle 100) | 8 of 10 | 16,997 |
 | Same method, earlier (ΔQ at cycle 50) | 6 of 10 | 13,697 |
 | Test every cell to the end | 10 of 10 | 41,280 |
@@ -31,7 +33,7 @@ Full numbers with confidence intervals: [`reports/v2_omni2-73292d79.md`](reports
 
 Omnigent is the layer that turns five separate Claude agents into one controlled lab. In this project it provides:
 
-| Omnigent feature | How CycleWise uses it | Where to see it |
+| Omnigent feature | How First Fifty uses it | Where to see it |
 |---|---|---|
 | **Agents defined in short YAML files** | A supervisor and four specialist agents, each with its own instructions, tools and model, in about 180 lines of YAML in total | [`omnigent/cyclewise_v2/`](omnigent/cyclewise_v2) |
 | **Multi-agent orchestration** | The supervisor hands work to the Evidence, Safety/Critic, Planner and Runner agents, and passes each one's structured output to the next | Live run `omni2-73292d79` |
@@ -86,7 +88,7 @@ DEMO_AUTO_APPROVE=true CYCLEWISE_LLM=offline .venv/bin/python -m cyclewise.v2.lo
 Or run it the way it's meant to run: live, with Claude agents in Omnigent, approving each step yourself. Use a normal terminal and keep it open:
 
 ```bash
-.venv/bin/omni run omnigent/cyclewise_v2        # then type: Run the CycleWise v2 study
+.venv/bin/omni run omnigent/cyclewise_v2        # then type: Run the First Fifty study
 ```
 
 At each of the 9 checkpoints (3 per batch), Omnigent asks you to approve the plan. `omnigent/cyclewise_lab` is the older one-decision version.
@@ -108,7 +110,7 @@ The log shows every approval recorded before the matching selection was committe
 
 Results (share of long-lived cells found, 12 cells kept per batch; full report in [`reports/omni-69fa0ff2.md`](reports/omni-69fa0ff2.md)):
 
-| Batch | CycleWise (live Claude agents) | ΔQ method | Early capacity |
+| Batch | First Fifty (live Claude agents) | ΔQ method | Early capacity |
 |---|---|---|---|
 | Batch 1 | 0.50 | **0.75** | 0.17 |
 | Batch 2 | 0.50 | 0.50 | 0.42 |

@@ -10,7 +10,7 @@ def request_approval(run_id: str, plan_id: str, note: str = '') -> dict:
     """Record human approval of a plan. Gated by an Omnigent ASK policy: this tool only runs after a human approves the prompt in the Omnigent UI.
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
         plan_id: Plan id returned by submit_test_plan.
         note: Optional note.
     """

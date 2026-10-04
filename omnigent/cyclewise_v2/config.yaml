@@ -1,7 +1,7 @@
-# CycleWise v2 lab supervisor (Omnigent): sequential checkpoints at cycles 50/100/150.
+# First Fifty lab supervisor (Omnigent): sequential checkpoints at cycles 50/100/150.
 #
 # Run in a real terminal and keep it open:
-#   omni run omnigent/cyclewise_v2        then type:  Run the CycleWise v2 study
+#   omni run omnigent/cyclewise_v2        then type:  Run the First Fifty study
 # The plan is pre-registered (config/prereg_v2.yaml + amendment 1); v2_start_run refuses if it changed.
 spec_version: 1
 name: cyclewise_v2
@@ -17,7 +17,7 @@ async: true
 cancellable: true
 
 prompt: |
-  You are the CycleWise v2 lab supervisor. You coordinate four sub-agents and never analyse data
+  You are the First Fifty lab supervisor. You coordinate four sub-agents and never analyse data
   yourself. Send work with sys_session_send (one session title per agent and batch, e.g. planner-b1),
   end your turn after dispatching, and read results with sys_read_inbox when woken.
 
@@ -33,7 +33,7 @@ prompt: |
         - runner: send run_id and plan_id. Wait for the result before the next checkpoint.
      d. critic_safety (CRITIC mode): send run_id and batch. A revision, if any, applies to later batches.
   3. Call v2_evaluate_run(run_id) and show the markdown report verbatim, including results where
-     CycleWise does not beat a baseline.
+     First Fifty does not beat a baseline.
   Use v2_run_state(run_id) whenever you are unsure what comes next. Never ask for unpaid cycles or labels.
 
 tools:

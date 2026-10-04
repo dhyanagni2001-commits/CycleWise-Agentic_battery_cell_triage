@@ -121,7 +121,7 @@ def evaluate(run_id: str) -> dict:
 
 
 def to_markdown(out: dict) -> str:
-    lines = [f"# CycleWise results: {out['run_id']}", "",
+    lines = [f"# First Fifty results: {out['run_id']}", "",
              f"LLM backend: {out['llm_backend']} ({out['model']}); deterministic-fallback steps: "
              f"{out['fallback_steps']}; DEMO_AUTO_APPROVE={out['demo_auto_approve']}; rule revised: {out['revised']}.",
              f"Budget: {out['budget_cells']} cells per batch. Primary metric: recall of long-lived cells at that "
@@ -130,7 +130,7 @@ def to_markdown(out: dict) -> str:
         lines += [f"## Batch {batch}", "",
                   f"{r['n_cells']} eligible cells; {r['n_censored']} censored ({r['n_label_unknown_primary']} with "
                   f"unknown label under the primary rule, excluded from scoring); {r['n_flagged']} safety flags. "
-                  f"CycleWise chose option {r['strategy']} with rule `{r['rule']['kind']}` "
+                  f"First Fifty chose option {r['strategy']} with rule `{r['rule']['kind']}` "
                   f"(fit_on={r['rule'].get('fit_on')}).", ""]
         for rn, rr in r["label_rules"].items():
             lines += [f"### {rn}", "", f"_{RULE_TEXT[rn]}._ {rr['n_long_lived']} long-lived of {rr['n_scored']} scored.", ""]
@@ -146,7 +146,7 @@ def to_markdown(out: dict) -> str:
             cw = rr["methods"]["cyclewise"]
             for m in BASELINES:
                 d = cw[f"diff_vs_{m}"]
-                lines.append(f"- CycleWise minus {m}: {d['mean']:+.2f} recall (95% CI [{d['ci_low']:+.2f}, {d['ci_high']:+.2f}])")
+                lines.append(f"- First Fifty minus {m}: {d['mean']:+.2f} recall (95% CI [{d['ci_low']:+.2f}, {d['ci_high']:+.2f}])")
             a = rr["acceleration"]
             ratio = a["cells_ratio_best_over_cyclewise"]
             lines += [f"- Cells tested in rank order to match {a['best_baseline']} (recall {_fmt(a['target_recall'])}): "

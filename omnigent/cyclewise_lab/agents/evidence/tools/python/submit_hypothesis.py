@@ -10,7 +10,7 @@ def submit_hypothesis(run_id: str, batch: str, hypothesis: str) -> dict:
     """Validate and record a Hypothesis JSON {features:[{name,direction,weight}], rationale, citations, label:"agent-generated"}. Returns the executable rule derived from it.
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
         batch: Batch key, e.g. 'b1' or 'b2'.
         hypothesis: Hypothesis JSON string.
     """

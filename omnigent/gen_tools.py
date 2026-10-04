@@ -42,7 +42,7 @@ BUNDLES = {
 }
 
 ARG_DOC = {
-    "run_id": "CycleWise run id returned by start_run.",
+    "run_id": "First Fifty run id returned by start_run.",
     "batch": "Batch key, e.g. 'b1' or 'b2'.",
     "role": "Batch role: 'train' or 'eval'.",
     "plan_id": "Plan id returned by submit_test_plan.",

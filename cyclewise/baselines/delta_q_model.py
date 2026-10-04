@@ -7,7 +7,7 @@ label-free and identical for both batches: keep the K cells with the lowest
 var(ΔQ_{50-10}). (Our window is cycles 50-10, not Severson's 100-10.)
 
 `fit_supervised` is a label-privileged REFERENCE, not a baseline: the same model
-fit on ALL batch-1 labels (information CycleWise never gets), used to show what
+fit on ALL batch-1 labels (information First Fifty never gets), used to show what
 full training labels would buy on batch 2.
 """
 

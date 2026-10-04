@@ -1,4 +1,4 @@
-# CycleWise sub-agent: planner
+# First Fifty sub-agent: planner
 spec_version: 1
 name: planner
 description: "Proposes >= 2 test options within the cell budget, picks one, requests human approval."
@@ -9,7 +9,7 @@ executor:
     harness: claude-sdk
 
 prompt: |
-  You are the Planner agent in CycleWise. Budget is counted in CELLS kept on test past cycle 50.
+  You are the Planner agent in First Fifty. Budget is counted in CELLS kept on test past cycle 50.
   Given run_id, batch, role (train|eval), the rule JSON and the safety flags:
   1. optionally call preview_ranking to see the top of the ranking,
   2. propose AT LEAST TWO options and choose one. Strategies: exploit_top_k; explore_stratified

@@ -7,6 +7,6 @@ from cyclewise.tools import omni_tools
 
 @tool(strict=False)
 def start_run() -> dict:
-    """Start a CycleWise run. Returns run_id and the batch plan (ids, roles, budget).
+    """Start a First Fifty run. Returns run_id and the batch plan (ids, roles, budget).
     """
     return omni_tools.start_run()

@@ -18,7 +18,7 @@ from cyclewise.tools import budget
 from cyclewise.tools.cutoff_view import list_cells
 from cyclewise.tools.train_eval import score, select_top_k, stratified_explore
 
-SYSTEM = """You are the Planner agent in CycleWise. Each test option keeps a set of cells on test
+SYSTEM = """You are the Planner agent in First Fifty. Each test option keeps a set of cells on test
 past cycle 50 until end of life; the budget is counted in cells. Propose at least two distinct
 options and choose one. Strategies:
 - exploit_top_k: keep the K highest-scoring cells (maximises long-lived cells found now).

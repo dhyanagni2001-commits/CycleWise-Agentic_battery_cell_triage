@@ -1,6 +1,6 @@
 # Omnigent server config for a shared/managed server.
 # Uploaded agent bundles may only use registered policy handlers; this registers
-# CycleWise's policies (cyclewise.policies.omni_policies.POLICY_REGISTRY).
+# First Fifty's policies (cyclewise.policies.omni_policies.POLICY_REGISTRY).
 #   omnigent server -c omnigent/server.yaml
 policy_modules:
   - cyclewise.policies.omni_policies

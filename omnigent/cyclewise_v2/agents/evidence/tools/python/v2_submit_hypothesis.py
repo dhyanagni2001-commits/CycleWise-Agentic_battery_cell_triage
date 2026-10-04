@@ -10,7 +10,7 @@ def v2_submit_hypothesis(run_id: str, batch: str, hypothesis: str) -> dict:
     """Validate and record the batch's scoring rule: JSON {features:[{name,direction,weight}], rationale, citations, label:"agent-generated"}; dq_logvar must be the base signal.
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
         batch: Batch key, e.g. 'b1' or 'b2'.
         hypothesis: Hypothesis JSON string.
     """

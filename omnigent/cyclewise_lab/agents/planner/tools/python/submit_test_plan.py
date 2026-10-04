@@ -10,7 +10,7 @@ def submit_test_plan(run_id: str, batch: str, role: str, plan_draft: str, rule: 
     """Validate a TestPlanDraft JSON {options:[>=2 {option_id, strategy, description, n_cells, n_explore, expected_learning}], chosen, reason}, fill cell ids from the rule, record it.
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
         batch: Batch key, e.g. 'b1' or 'b2'.
         role: Batch role: 'train' or 'eval'.
         plan_draft: TestPlanDraft JSON string.

@@ -10,6 +10,6 @@ def v2_run_state(run_id: str) -> dict:
     """Where the run is: per batch, the next checkpoint, budget spent, revised rule, and the event list.
 
     Args:
-        run_id: CycleWise run id returned by start_run.
+        run_id: First Fifty run id returned by start_run.
     """
     return omni_tools_v2.v2_run_state(run_id=run_id)

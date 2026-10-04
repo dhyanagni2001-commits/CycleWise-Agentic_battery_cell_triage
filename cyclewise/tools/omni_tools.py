@@ -68,7 +68,7 @@ def _parse(x: Any) -> Any:
 
 @safe
 def start_run() -> dict:
-    """Start a CycleWise run. Returns run_id and the batch plan (ids, roles, budget)."""
+    """Start a First Fifty run. Returns run_id and the batch plan (ids, roles, budget)."""
     cfg = load_config()
     run_id = f"omni-{uuid.uuid4().hex[:8]}"
     research_log.append(run_id, "orchestrator", "run_start", {

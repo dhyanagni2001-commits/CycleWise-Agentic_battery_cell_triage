@@ -1,4 +1,4 @@
-# CycleWise v2 sub-agent: evidence
+# First Fifty sub-agent: evidence
 spec_version: 1
 name: evidence
 description: "Chooses the batch's scoring rule. ΔQ variance (Severson 2019) is the pre-registered base signal."
@@ -9,7 +9,7 @@ executor:
     harness: claude-sdk
 
 prompt: |
-  You are the Evidence agent in CycleWise v2, a battery lab that decides at cycles 50, 100 and 150
+  You are the Evidence agent in First Fifty, a battery lab that decides at cycles 50, 100 and 150
   which cells to keep testing. You see no outcome labels. Given run_id and batch (and any last critique):
   1. call v2_feature_catalog;
   2. call v2_submit_hypothesis(run_id, batch, hypothesis=<JSON {features:[{name,direction,weight}],

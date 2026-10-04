@@ -1,5 +1,5 @@
 """v2 scoring harness (not an agent): recall at k_final and channel-cycles, for
-CycleWise and every pre-registered comparator, with bootstrap CIs and the
+First Fifty and every pre-registered comparator, with bootstrap CIs and the
 pre-registered claim rules. Headline batch: b3 (when present).
 """
 
@@ -160,7 +160,7 @@ def _f(x) -> str:
 
 
 def to_markdown(out: dict) -> str:
-    L = [f"# CycleWise v2 results: {out['run_id']}", "",
+    L = [f"# First Fifty results: {out['run_id']}", "",
          f"Pre-registration commit `{(out['prereg_commit'] or '')[:10]}` (sha256 `{(out['prereg_sha256'] or '')[:12]}`). "
          f"LLM backend: {out['llm_backend']}; fallback steps: {out['fallback_steps']}; "
          f"DEMO_AUTO_APPROVE={out['demo_auto_approve']}; rule revised after: {out['revisions'] or 'none'}.", ""]
@@ -175,7 +175,7 @@ def to_markdown(out: dict) -> str:
             if rr.get("undefined"):
                 L += [f"**{rr['undefined']}.**", ""]
                 continue
-            L += ["| strategy | recall@k | 95% CI | channel-cycles | CycleWise − this (95% CI) | claim |",
+            L += ["| strategy | recall@k | 95% CI | channel-cycles | First Fifty − this (95% CI) | claim |",
                   "|---|---|---|---|---|---|"]
             for m, d in rr["methods"].items():
                 diff = d.get("cyclewise_minus_this")

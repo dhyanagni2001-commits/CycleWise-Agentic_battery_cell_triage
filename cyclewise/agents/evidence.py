@@ -11,7 +11,7 @@ from cyclewise.data.featurize import FEATURE_CATALOG
 from cyclewise.record import research_log
 from cyclewise.tools.cutoff_view import feature_summary, list_cells
 
-SYSTEM = """You are the Evidence agent in CycleWise, an agentic battery-testing lab.
+SYSTEM = """You are the Evidence agent in First Fifty, an agentic battery-testing lab.
 You see ONLY the first 50 cycles of each LFP/graphite cell (A123 APR18650M1A, fast-charge
 protocols, 30 C). No outcome labels are available to you. Choose 1-6 early-cycle features
 whose values you expect to separate long-lived cells from short-lived ones, with a sign
