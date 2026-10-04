@@ -1,10 +1,10 @@
 {
-  "run_id": "v2-ee5a911b",
+  "run_id": "v2-e9f649f6",
   "version": 2,
   "prereg_commit": "e5725a5e7fdc81ec2c7057bb71a081f9c2dd8f1e",
   "prereg_sha256": "ac30f55bb9955dde15d08fa63c0858b30dd0cb8027edf802d3a7729ac3fad676",
   "llm_backend": "offline",
-  "demo_auto_approve": false,
+  "demo_auto_approve": true,
   "fallback_steps": 12,
   "revisions": [
     "b2"

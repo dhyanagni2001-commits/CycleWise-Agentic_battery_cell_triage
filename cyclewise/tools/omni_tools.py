@@ -72,7 +72,8 @@ def start_run() -> dict:
     cfg = load_config()
     run_id = f"omni-{uuid.uuid4().hex[:8]}"
     research_log.append(run_id, "orchestrator", "run_start", {
-        "config_hash": cfg["_hash"], "orchestrator": "omnigent", "llm_backend": "omnigent (claude-sdk harness)", "budget_cells": budget.total_budget(),
+        "config_hash": cfg["_hash"], "orchestrator": "omnigent", "llm_backend": "omnigent (claude-sdk harness)",
+        "model": "Claude via Omnigent claude-sdk harness", "DEMO_AUTO_APPROVE": False, "budget_cells": budget.total_budget(),
         "batches": {k: b["role"] for k, b in cfg["batches"].items()}})
     return {"ok": True, "run_id": run_id, "budget_cells_per_batch": budget.total_budget(),
             "batches": [{"batch": k, "role": b["role"]} for k, b in cfg["batches"].items()]}

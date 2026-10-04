@@ -6,3 +6,4 @@ _spec = importlib.util.spec_from_file_location("gen_tools", _p)
 _m = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_m)
 AGENT_TOOLS = _m.AGENT_TOOLS
+AGENT_TOOLS_V2 = _m.AGENT_TOOLS_V2

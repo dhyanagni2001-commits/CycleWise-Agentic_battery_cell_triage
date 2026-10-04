@@ -56,21 +56,36 @@ def leakage_guard(event: dict) -> dict | None:
 
 def approval_gate(event: dict) -> dict | None:
     """ASK a human before any plan is approved. The reason shows the plan."""
-    if event.get("type") != "tool_call" or (event.get("data") or {}).get("name") != "request_approval":
+    name = (event.get("data") or {}).get("name")
+    if event.get("type") != "tool_call" or name not in ("request_approval", "v2_request_approval"):
         return None
     args = _args(event)
     try:
-        from cyclewise.agents.approval import render
-        from cyclewise.agents.planner import load_plan
-        text = render(load_plan(args["run_id"], args["plan_id"]))
+        if name == "v2_request_approval":
+            text = _render_v2(args["run_id"], args["plan_id"])
+        else:
+            from cyclewise.agents.approval import render
+            from cyclewise.agents.planner import load_plan
+            text = render(load_plan(args["run_id"], args["plan_id"]))
     except Exception as e:  # still ASK; never auto-approve
         text = f"plan {args.get('plan_id')} (could not render: {e})"
     return {"result": "ASK", "reason": text}
 
 
+def _render_v2(run_id: str, plan_id: str) -> str:
+    from cyclewise.record import research_log
+    from cyclewise.v2.loop import render
+    p = [r["output"] for r in research_log.rows(run_id=run_id, event="checkpoint_plan")
+         if r["output"]["plan_id"] == plan_id][-1]
+    chosen = next(o for o in p["options"] if o["option_id"] == p["chosen"])
+    return render(p["batch"], p["checkpoint"], plan_id, chosen, p["options"], p["reason"], p["selected"],
+                  p["stopped"], p["flags"], f"Remaining extension budget: {p['remaining_budget']} channel-cycles")
+
+
 def reveal_gate(event: dict) -> dict | None:
     """DENY execute_plan unless an approval for that exact plan is in the research log."""
-    if event.get("type") != "tool_call" or (event.get("data") or {}).get("name") != "execute_plan":
+    if event.get("type") != "tool_call" or (event.get("data") or {}).get("name") not in ("execute_plan",
+                                                                                      "v2_execute_checkpoint"):
         return None
     args = _args(event)
     from cyclewise.record import research_log

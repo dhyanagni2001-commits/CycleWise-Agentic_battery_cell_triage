@@ -25,7 +25,10 @@ def _setup():
     if uri.startswith("sqlite:///") and not uri.startswith("sqlite:////"):
         uri = f"sqlite:///{ROOT / uri.removeprefix('sqlite:///')}"
     mlflow.set_tracking_uri(uri)
-    mlflow.set_experiment(os.environ.get("CYCLEWISE_MLFLOW_EXPERIMENT", cfg["mlflow_experiment"]))
+    name = os.environ.get("CYCLEWISE_MLFLOW_EXPERIMENT", cfg["mlflow_experiment"])
+    if uri.startswith("databricks") and not name.startswith("/"):
+        name = f"/Shared/{name}"  # Databricks experiments need an absolute workspace path
+    mlflow.set_experiment(name)
     return mlflow
 
 

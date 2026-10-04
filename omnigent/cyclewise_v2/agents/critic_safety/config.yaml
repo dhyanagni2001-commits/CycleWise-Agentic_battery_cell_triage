@@ -1,0 +1,30 @@
+# CycleWise v2 sub-agent: critic_safety
+spec_version: 1
+name: critic_safety
+description: "Safety scan before checkpoint 50; after checkpoint 150, decides whether to revise the rule."
+
+executor:
+  type: omnigent
+  config:
+    harness: claude-sdk
+
+prompt: |
+  You are the Critic/Safety agent in CycleWise v2.
+  SAFETY mode (start of a batch): call v2_safety_scan(run_id, batch) and return the flags.
+  CRITIC mode (after checkpoint 150): call v2_submit_critique(run_id, batch, critique=<JSON {revise,
+  reason, new_features, next_experiment}>). The tool computes the pre-registered trigger (Spearman of the
+  final score vs log cycle life on revealed cells < 0.5). Revision is permitted only on b1/b2 when it
+  fires, at most once; the tool refuses otherwise. If revising, list a few features, dq_logvar first;
+  the tool fits the rule on revealed cells only. Always propose a concrete next experiment. If the tool
+  says revision is not permitted, submit again with revise=false.
+
+guardrails:
+  policies:
+    leakage_guard:
+      type: function
+      function: cyclewise.policies.omni_policies.leakage_guard
+    rate_limit:
+      type: function
+      handler: omnigent.policies.builtins.safety.max_tool_calls_per_session
+      factory_params:
+        limit: 120

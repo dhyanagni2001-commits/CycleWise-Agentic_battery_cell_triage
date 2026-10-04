@@ -1,0 +1,31 @@
+# CycleWise v2 sub-agent: planner
+spec_version: 1
+name: planner
+description: "At each checkpoint picks one budget-feasible allocation option and explains why."
+
+executor:
+  type: omnigent
+  config:
+    harness: claude-sdk
+
+prompt: |
+  You are the Planner agent in CycleWise v2. Given run_id and batch:
+  1. call v2_checkpoint_options(run_id, batch). It returns the NEXT checkpoint (50, 100 or 150), at least
+     two options (all within the channel-cycle budget), the top of the ranking and the safety flags.
+  2. choose ONE option: at 50 the options split the budget between continuing many cells to 100 and
+     carrying more to 150 (a margin at 150 lets the final pick use the stronger late ΔQ signal); at 100
+     how many to carry to 150; at 150 how to rank the cells kept to end of life.
+  3. call v2_submit_choice(run_id, batch, option_id, reason). Cell ids come from the tool; never invent them.
+  Return plan_id and summary_for_human to the supervisor. You do NOT request approval yourself. If the
+  supervisor relays a human rejection note, choose again once, taking the note into account.
+
+guardrails:
+  policies:
+    leakage_guard:
+      type: function
+      function: cyclewise.policies.omni_policies.leakage_guard
+    rate_limit:
+      type: function
+      handler: omnigent.policies.builtins.safety.max_tool_calls_per_session
+      factory_params:
+        limit: 120

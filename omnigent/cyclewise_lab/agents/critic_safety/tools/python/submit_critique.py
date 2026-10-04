@@ -14,6 +14,6 @@ def submit_critique(run_id: str, batch: str, role: str, critique: str, revisions
         batch: Batch key, e.g. 'b1' or 'b2'.
         role: Batch role: 'train' or 'eval'.
         critique: CritiqueDraft JSON string.
-        revisions_used: Revisions already made for this batch.
+        revisions_used: Ignored; read from the log.
     """
     return omni_tools.submit_critique(run_id=run_id, batch=batch, role=role, critique=critique, revisions_used=revisions_used)

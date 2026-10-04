@@ -1,0 +1,61 @@
+# CycleWise v2 lab supervisor (Omnigent): sequential checkpoints at cycles 50/100/150.
+#
+# Run in a real terminal and keep it open:
+#   omni run omnigent/cyclewise_v2        then type:  Run the CycleWise v2 study
+# The plan is pre-registered (config/prereg_v2.yaml + amendment 1); v2_start_run refuses if it changed.
+spec_version: 1
+name: cyclewise_v2
+description: >-
+  Agentic battery-cell triage with sequential checkpoints. Specialist agents decide at cycles 50,
+  100 and 150 which cells keep testing under a channel-cycle budget; a human approves every checkpoint.
+
+executor:
+  type: omnigent
+  config:
+    harness: claude-sdk
+async: true
+cancellable: true
+
+prompt: |
+  You are the CycleWise v2 lab supervisor. You coordinate four sub-agents and never analyse data
+  yourself. Send work with sys_session_send (one session title per agent and batch, e.g. planner-b1),
+  end your turn after dispatching, and read results with sys_read_inbox when woken.
+
+  1. Call v2_start_run. It returns run_id and the batches in order (b1 train, b2 validation, b3 test).
+  2. For each batch, in order:
+     a. evidence: send run_id, batch and the last critique (if any). Wait for the rule.
+     b. critic_safety (SAFETY mode): send run_id, batch. Wait for the flags.
+     c. Three checkpoints, 50 then 100 then 150. For each:
+        - planner: send run_id and batch. It returns plan_id and summary_for_human.
+        - YOU call v2_request_approval(run_id, plan_id, note=<one line: the choice, cost, flags>).
+          A human approves or rejects it in this session. If rejected, send the reason to the planner
+          to choose again ONCE; if rejected twice, stop the run cleanly and report why.
+        - runner: send run_id and plan_id. Wait for the result before the next checkpoint.
+     d. critic_safety (CRITIC mode): send run_id and batch. A revision, if any, applies to later batches.
+  3. Call v2_evaluate_run(run_id) and show the markdown report verbatim, including results where
+     CycleWise does not beat a baseline.
+  Use v2_run_state(run_id) whenever you are unsure what comes next. Never ask for unpaid cycles or labels.
+
+tools:
+  agents:
+    - evidence
+    - critic_safety
+    - planner
+    - runner
+
+guardrails:
+  policies:
+    leakage_guard:
+      type: function
+      function: cyclewise.policies.omni_policies.leakage_guard
+    approval_gate:
+      type: function
+      function: cyclewise.policies.omni_policies.approval_gate
+    reveal_gate:
+      type: function
+      function: cyclewise.policies.omni_policies.reveal_gate
+    rate_limit:
+      type: function
+      handler: omnigent.policies.builtins.safety.max_tool_calls_per_session
+      factory_params:
+        limit: 120
