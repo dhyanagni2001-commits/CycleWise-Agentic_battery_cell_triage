@@ -1,8 +1,8 @@
 # CycleWise
 
-**An AI lab that decides which battery cells are worth testing to the end, after seeing only their first cycles.**
+**Built on [Omnigent](https://omnigent.ai): a team of Claude agents that decides which battery cells are worth testing to the end, after seeing only their first cycles.**
 
-Testing one battery cell until it wears out takes weeks. A lab can't test every cell, so it has to guess early which cells will last longest. CycleWise uses a team of AI agents, run by [Omnigent](https://omnigent.ai), to make those calls under a fixed budget. A human approves every decision before any results are revealed.
+Testing one battery cell until it wears out takes weeks. A lab can't test every cell, so it has to guess early which cells will last longest. In CycleWise, **Omnigent** runs a team of five Claude agents that make those calls under a fixed budget. Omnigent's policies keep the agents away from data they haven't paid for, and Omnigent asks a person to approve every decision before any results are revealed.
 
 **Demo:** [interactive replay of the logged runs](https://claude.ai/artifact/CAC2xACXT5Tq8iVduzMkaJ) (also in [`demo/cyclewise-replay.html`](demo/cyclewise-replay.html); open it in a browser).
 
@@ -27,14 +27,29 @@ On a batch of 40 cells that was kept sealed until the plan was locked in, CycleW
 
 Full numbers with confidence intervals: [`reports/v2_omni2-73292d79.md`](reports/v2_omni2-73292d79.md) (live run) and [`reports/v2_v2-final-001.md`](reports/v2_v2-final-001.md) (frozen policy). The sealed batch was evaluated once per decision-maker; nothing was changed between or after the runs.
 
+## What Omnigent does here
+
+Omnigent is the layer that turns five separate Claude agents into one controlled lab. In this project it provides:
+
+| Omnigent feature | How CycleWise uses it | Where to see it |
+|---|---|---|
+| **Agents defined in short YAML files** | A supervisor and four specialist agents, each with its own instructions, tools and model, in about 180 lines of YAML in total | [`omnigent/cyclewise_v2/`](omnigent/cyclewise_v2) |
+| **Multi-agent orchestration** | The supervisor hands work to the Evidence, Safety/Critic, Planner and Runner agents, and passes each one's structured output to the next | Live run `omni2-73292d79` |
+| **Policies on every tool call** | `leakage_guard` blocks requests for cycles past 50 and for the hidden label tables. `reveal_gate` blocks a plan from running until it is approved. `rate_limit` caps tool calls per session. Omnigent enforces these on every tool call, whatever the agent intends. | [`cyclewise/policies/omni_policies.py`](cyclewise/policies/omni_policies.py) |
+| **Human approval built in** | The `approval_gate` policy turns every checkpoint into an Omnigent approval request in the terminal or web UI. In the live run a person approved all 9. | `approval` rows in the research log |
+| **Python functions as tools** | Every agent tool is a plain Python function that Omnigent exposes with a typed schema | [`cyclewise/tools/omni_tools_v2.py`](cyclewise/tools/omni_tools_v2.py) |
+| **Swap the runtime in one line** | The agents run on Claude through Omnigent's claude-sdk harness. Changing the `harness:` line in the YAML swaps the runtime without touching the tools or policies. | `executor:` block in each `config.yaml` |
+| **Web UI and saved sessions** | The full live conversation, every agent handoff and every approval can be reopened in Omnigent's web UI | `omni run omnigent/cyclewise_v2` |
+| **Runs on Databricks** | Omnigent has a Databricks-managed version, and the data side is set up for Unity Catalog | [Databricks](#databricks) section below |
+
 ## How it works
 
 1. **Every cell runs 50 cycles.**
 2. **At cycles 50 and 100,** the agents stop clearly weak cells and pay for more cycles only on the uncertain ones.
 3. **At cycle 150,** they pick the cells to test to the end.
-4. **Before any new data is revealed, a human approves the decision.**
+4. **Before any new data is revealed, a human approves the decision through Omnigent.**
 
-Four agents share the work:
+Omnigent runs a supervisor agent and four specialist agents, all Claude:
 
 | Agent | Job |
 |---|---|
@@ -45,7 +60,7 @@ Four agents share the work:
 
 ## Why you can trust the result
 
-- **No peeking.** The agents can only see data the lab has paid for. A request for cycle 51 before it's paid for is blocked, and tests prove it.
+- **No peeking.** The agents can only see data the lab has paid for. A request for cycle 51 before it's paid for is blocked by an Omnigent policy and again by the tool code, and tests prove both.
 - **Plan locked first.** The test plan was committed to GitHub before the test batch was even downloaded, and the timestamps prove the order.
 - **Nothing hidden.** Every decision is saved in a tamper-evident log. Our first attempt (one decision at cycle 50) lost to the published method, finding 5 of 12 long-lived cells against its 9, and it is still reported in [`reports/final-check.md`](reports/final-check.md).
 
@@ -68,7 +83,7 @@ Run the study with automatic approvals (marked as such in the log):
 DEMO_AUTO_APPROVE=true CYCLEWISE_LLM=offline .venv/bin/python -m cyclewise.v2.loop
 ```
 
-Or run it live with Claude agents in Omnigent, approving each step yourself. Use a normal terminal and keep it open:
+Or run it the way it's meant to run: live, with Claude agents in Omnigent, approving each step yourself. Use a normal terminal and keep it open:
 
 ```bash
 .venv/bin/omni run omnigent/cyclewise_v2        # then type: Run the CycleWise v2 study
@@ -76,9 +91,9 @@ Or run it live with Claude agents in Omnigent, approving each step yourself. Use
 
 At each of the 9 checkpoints (3 per batch), Omnigent asks you to approve the plan. `omnigent/cyclewise_lab` is the older one-decision version.
 
-## Live run with Claude agents
+## Live runs in Omnigent
 
-**Checkpoint version** (run `omni2-73292d79`): Claude agents ran all three batches in Omnigent. A person approved each of the 9 checkpoint plans before any data was paid for or revealed, and all 9 approvals are in the log. The result is in the table above. The supervisor itself reported three process issues, recorded here as it gave them:
+**Checkpoint version** (run `omni2-73292d79`): Omnigent ran five Claude agents through all three batches. A person approved each of the 9 checkpoint plans before any data was paid for or revealed, and all 9 approvals are in the log. The result is in the table above. The supervisor itself reported three process issues, recorded here as it gave them:
 - The Planner ranked the final pick by ΔQ alone on batches 1 and 3, but by the full rule on batch 2.
 - On batch 2 the revision trigger fired and a revision was allowed, but the Critic skipped it. It was reading an outdated threshold in `AGENTS.md`, now corrected.
 - One batch-2 rule was submitted by mistake and then replaced before any checkpoint ran.
