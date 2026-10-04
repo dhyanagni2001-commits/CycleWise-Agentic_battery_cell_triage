@@ -177,14 +177,14 @@ footer{font-size:13px; color:var(--muted)}
   <div class="eyebrow">Run it yourself</div>
   <h2 id="run-h">The working system</h2>
   <p>The agents run in <a href="https://omnigent.ai" target="_blank" rel="noopener">Omnigent</a> with Claude, and a person approves every checkpoint before new data is revealed. The full code, tests and reports are on GitHub.</p>
-  <pre>git clone https://github.com/dhyanagni2001-commits/First Fifty-Agentic_battery_cell_triage.git
-cd First Fifty-Agentic_battery_cell_triage
+  <pre>git clone https://github.com/dhyanagni2001-commits/First_Fifty.git
+cd First_Fifty
 uv venv --python 3.12 .venv &amp;&amp; uv pip install --python .venv -e ".[dev]" omnigent
 .venv/bin/python -m cyclewise.data.download
 .venv/bin/python -m cyclewise.data.load_raw &amp;&amp; .venv/bin/python -m cyclewise.data.splits
 .venv/bin/python -m cyclewise.v2.data --with-b3
 .venv/bin/omni run omnigent/cyclewise_v2      # then type: Run the First Fifty study</pre>
-  <p><a href="https://github.com/dhyanagni2001-commits/First Fifty-Agentic_battery_cell_triage" target="_blank" rel="noopener">Open the repository on GitHub</a></p>
+  <p><a href="https://github.com/dhyanagni2001-commits/First_Fifty" target="_blank" rel="noopener">Open the repository on GitHub</a></p>
 </section>
 
 <footer>Data: Severson et al., "Data-driven prediction of battery cycle life before capacity degradation", <i>Nature Energy</i> 4, 383–391 (2019), dataset from data.matr.io (CC BY 4.0). Labels for cells that were stopped early are shown only in the after-the-run scoring view.</footer>
