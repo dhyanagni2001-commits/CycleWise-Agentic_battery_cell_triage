@@ -4,22 +4,28 @@
 
 Testing one battery cell until it wears out takes weeks. A lab can't test every cell, so it has to guess early which cells will last longest. CycleWise uses a team of AI agents, run by [Omnigent](https://omnigent.ai), to make those calls under a fixed budget. A human approves every decision before any results are revealed.
 
+**Demo:** [interactive replay of the logged runs](https://claude.ai/artifact/CAC2xACXT5Tq8iVduzMkaJ) (also in [`demo/cyclewise-replay.html`](demo/cyclewise-replay.html); open it in a browser).
+
 Built for Hack-Nation x Databricks, Challenge 03 "Agentic Scientific Discovery", using the public battery dataset from Severson et al., *Nature Energy* 2019.
 
 ## Result
 
-On a batch of 40 cells that was kept sealed until the plan was locked in, CycleWise found **8 of the 10 longest-lived cells**:
+On a batch of 40 cells that was kept sealed until the plan was locked in, CycleWise was run two ways:
 
 | Approach | Long-lived cells found | Test cycles used |
 |---|---|---|
-| **CycleWise** | **8 of 10** | **15,475** |
+| **CycleWise, live Claude agents in Omnigent, every step approved by a person** | **7 of 10** | **15,338** |
+| **CycleWise, frozen policy, automatic approvals** | **8 of 10** | **15,475** |
 | Best published method (ΔQ at cycle 100) | 8 of 10 | 16,997 |
 | Same method, earlier (ΔQ at cycle 50) | 6 of 10 | 13,697 |
 | Test every cell to the end | 10 of 10 | 41,280 |
 
-- **Same accuracy as the best method, with 9% fewer test cycles.**
-- **62% fewer test cycles than testing everything.**
-- **Honest caveat:** with only 40 cells these differences are not statistically confirmed. Full numbers with confidence intervals are in [`reports/v2_v2-final-001.md`](reports/v2_v2-final-001.md).
+- **Frozen policy:** this is the pre-registered test. It matched the best method's accuracy with 9% fewer test cycles.
+- **Live Claude agents:** they found one long-lived cell fewer than the best method, with 10% fewer test cycles. They made their own choices: a more cautious budget split at cycle 50 than the pre-registered default, a five-feature rule, and a different final ranking on each batch.
+- **Both runs** used about 63% fewer test cycles than testing everything, and both beat the same method used at cycle 50.
+- **Not statistically confirmed:** with only 40 cells, none of these differences passes the claim rules fixed in advance.
+
+Full numbers with confidence intervals: [`reports/v2_omni2-73292d79.md`](reports/v2_omni2-73292d79.md) (live run) and [`reports/v2_v2-final-001.md`](reports/v2_v2-final-001.md) (frozen policy). The sealed batch was evaluated once per decision-maker; nothing was changed between or after the runs.
 
 ## How it works
 
@@ -72,7 +78,14 @@ At each of the 9 checkpoints (3 per batch), Omnigent asks you to approve the pla
 
 ## Live run with Claude agents
 
-A full live run of the one-decision version completed in Omnigent (run `omni-69fa0ff2`):
+**Checkpoint version** (run `omni2-73292d79`): Claude agents ran all three batches in Omnigent. A person approved each of the 9 checkpoint plans before any data was paid for or revealed, and all 9 approvals are in the log. The result is in the table above. The supervisor itself reported three process issues, recorded here as it gave them:
+- The Planner ranked the final pick by ΔQ alone on batches 1 and 3, but by the full rule on batch 2.
+- On batch 2 the revision trigger fired and a revision was allowed, but the Critic skipped it. It was reading an outdated threshold in `AGENTS.md`, now corrected.
+- One batch-2 rule was submitted by mistake and then replaced before any checkpoint ran.
+
+Replay with `.venv/bin/python -m cyclewise.demo.replay omni2-73292d79 --pause`.
+
+**One-decision version** (run `omni-69fa0ff2`), the earlier design:
 - four Claude agents handed off to each other on two batches;
 - a human approved each plan before any result was revealed.
 
@@ -120,8 +133,8 @@ The scripts load the data into Unity Catalog and lock the agents out of the hidd
 | | |
 |---|---|
 | Data, agents, checkpoints, evaluation | ✅ Working, 70 tests passing |
-| Result on the sealed test batch | ✅ Matches the best method at lower cost (not statistically confirmed) |
-| Live run with Claude agents in Omnigent | ✅ Completed for the one-decision version (`omni-69fa0ff2`). ⚠️ The v2 checkpoint version is built and tested but has not been run live yet |
+| Result on the sealed test batch | Frozen policy matches the best method at 9% lower cost; live agents found one cell fewer at 10% lower cost (neither statistically confirmed) |
+| Live run with Claude agents in Omnigent | ✅ Completed for both versions: checkpoint version `omni2-73292d79` (9 checkpoints, all approved by a person) and one-decision version `omni-69fa0ff2` |
 | Databricks (Unity Catalog, dashboard) | ⚠️ Scripts checked offline (dry run + tests); not yet run on a workspace |
 
 ## More

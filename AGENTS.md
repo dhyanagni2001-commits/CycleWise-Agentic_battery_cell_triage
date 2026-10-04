@@ -1,5 +1,26 @@
 # CycleWise agent specs and policies
 
+There are two Omnigent setups. **Use v2** unless you are reproducing the earlier result.
+
+| Setup | Folder | Design | Revision trigger |
+|---|---|---|---|
+| **v2 (current)** | `omnigent/cyclewise_v2/` | Checkpoints at cycles 50, 100, 150 under a channel-cycle budget | Spearman(final score, log cycle life) on revealed cells **< 0.5**, allowed after **b1 and b2**, never on b3 |
+| v1 (earlier) | `omnigent/cyclewise_lab/` | One decision at cycle 50 under a cell budget | precision@K < 0.5 or Spearman < 0.3, train batch only |
+
+The v2 numbers come from `config/prereg_v2.yaml`, and the v2 tools enforce them. If this file and the tools ever disagree, the tools and the pre-registration are right.
+
+## v2 agents (`omnigent/cyclewise_v2/`)
+
+- **Supervisor:** `v2_start_run`, `v2_run_state`, `v2_request_approval` (gated by an ASK at every checkpoint), `v2_evaluate_run`. It passes the rule in force from batch to batch.
+- **Evidence:** `v2_feature_catalog`, `v2_submit_hypothesis`. ΔQ variance (`dq_logvar`, direction −1) must be the base signal with the largest weight. The rule is fixed once a batch's first checkpoint runs.
+- **Planner:** `v2_checkpoint_options`, `v2_submit_choice`. At each checkpoint it picks one of at least two options, all within budget; cell IDs come from the tool.
+- **Runner:** `v2_execute_checkpoint`. It runs only an approved plan, once, in order.
+- **Critic/Safety:** `v2_safety_scan`, `v2_submit_critique`. Revision is permitted when the trigger above fires on b1 or b2, at most once per batch, and is fit on revealed cells only.
+
+## v1 agents (`omnigent/cyclewise_lab/`)
+
+The sections below describe the earlier v1 setup.
+
 The Omnigent definitions live in `omnigent/cyclewise_lab/`:
 
 - `config.yaml` is the supervisor.
