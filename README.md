@@ -76,7 +76,18 @@ A full live run of the one-decision version completed in Omnigent (run `omni-69f
 - four Claude agents handed off to each other on two batches;
 - a human approved each plan before any result was revealed.
 
-The log shows every approval recorded before the matching selection was committed. The agents also acted sensibly on their own: the Planner flagged a near-tie at the cutoff, and the Critic refused a revision the rules did not allow. Replay it with `.venv/bin/python -m cyclewise.demo.replay omni-69fa0ff2 --pause`.
+The log shows every approval recorded before the matching selection was committed. The agents also acted sensibly on their own: the Planner flagged a near-tie at the cutoff, and the Critic refused a revision the rules did not allow.
+
+Results (share of long-lived cells found, 12 cells kept per batch; full report in [`reports/omni-69fa0ff2.md`](reports/omni-69fa0ff2.md)):
+
+| Batch | CycleWise (live Claude agents) | ΔQ method | Early capacity |
+|---|---|---|---|
+| Batch 1 | 0.50 | **0.75** | 0.17 |
+| Batch 2 | 0.50 | 0.50 | 0.42 |
+
+This one-decision version trailed the published ΔQ method on batch 1 and tied it on batch 2. That is why the project moved to the checkpoint design shown in the [Result](#result) section. Batch 2 uses the within-batch definition of long-lived; under the stricter batch-1 definition it has no long-lived cells, so that score can't be computed.
+
+Replay the run step by step with `.venv/bin/python -m cyclewise.demo.replay omni-69fa0ff2 --pause`.
 
 ## Databricks
 
