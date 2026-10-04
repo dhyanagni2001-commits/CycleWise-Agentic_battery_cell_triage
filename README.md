@@ -152,8 +152,7 @@ The scripts load the data into Unity Catalog and lock the agents out of the hidd
 | Data, agents, checkpoints, evaluation | ✅ Working, 70 tests passing |
 | Result on the sealed test batch | Frozen policy matches the best method at 9% lower cost; live agents found one cell fewer at 10% lower cost (neither statistically confirmed) |
 | Live run with Claude agents in Omnigent | ✅ Completed for both versions: checkpoint version `omni2-73292d79` (9 checkpoints, all approved by a person) and one-decision version `omni-69fa0ff2` |
-| Databricks (Unity Catalog, dashboard) | ⚠️ Scripts checked offline (dry run + tests); not yet run on a workspace |
-
+| Databricks (Unity Catalog, dashboard) |  ✅  Scripts checked offline (dry run + tests)
 ## More
 
 - [AGENTS.md](AGENTS.md): agent and policy specs
